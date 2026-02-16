@@ -6,7 +6,7 @@ import type { CustomTag } from "@/lib/types";
 import { TagPill } from "./tag-pill";
 
 const TAG_COLORS = [
-  "#00ffa3",
+  "#e0aa0f",
   "#f59e0b",
   "#3b82f6",
   "#ef4444",

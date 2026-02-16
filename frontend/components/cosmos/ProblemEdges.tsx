@@ -20,8 +20,8 @@ export function ProblemEdges({ source, neighbors, problemMap }: ProblemEdgesProp
     const colors: number[] = [];
 
     const srcPos = new THREE.Vector3(source.x, source.y, source.z);
-    const accentColor = new THREE.Color("#00ffa3");
-    const dimColor = new THREE.Color("#00ffa3").multiplyScalar(0.3);
+    const accentColor = new THREE.Color("#e0aa0f");
+    const dimColor = new THREE.Color("#e0aa0f").multiplyScalar(0.3);
 
     for (const nb of neighbors) {
       const target = problemMap.get(nb.id);

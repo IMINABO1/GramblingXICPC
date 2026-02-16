@@ -32,7 +32,11 @@
       "Bash(do taskkill //PID $pid //F)",
       "Bash(python:*)",
       "Bash(uvicorn:*)",
-      "Bash(wmic process:*)"
+      "Bash(wmic process:*)",
+      "Bash(powershell.exe -Command \"Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(powershell.exe -Command \"Get-Process | Where-Object { $_.ProcessName -match ''node|next'' } | Select-Object Id, ProcessName\")",
+      "Bash(cmd.exe /c \"rmdir /s /q C:\\\\Users\\\\rober\\\\Documents\\\\iminabo_stuff\\\\code\\\\gravenger\\\\frontend\\\\.next\")",
+      "Bash(npx next dev:*)"
     ]
   }
 }

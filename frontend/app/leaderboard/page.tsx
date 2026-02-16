@@ -277,7 +277,7 @@ function LeaderboardContent() {
         <StatBox
           value={totalTeamSolves}
           label={`Team Solves (of ${curated_total})`}
-          color="#00ffa3"
+          color="#e0aa0f"
         />
         <StatBox
           value={activeThisWeek}

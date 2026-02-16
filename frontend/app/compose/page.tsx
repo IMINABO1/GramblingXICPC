@@ -158,7 +158,7 @@ export default function Compose() {
           topics={topics}
           coverage={coverageA}
           onCycle={cycleMember}
-          accent="#00ffa3"
+          accent="#e0aa0f"
         />
         <TeamColumn
           title="Team 2"
@@ -316,7 +316,7 @@ function MemberStrengthRow({
   const slotLabel =
     slot === "team_a" ? "T1" : slot === "team_b" ? "T2" : "B";
   const slotColor =
-    slot === "team_a" ? "#00ffa3" : slot === "team_b" ? "#3b82f6" : "#8888a0";
+    slot === "team_a" ? "#e0aa0f" : slot === "team_b" ? "#3b82f6" : "#8888a0";
 
   return (
     <div className="flex items-center gap-3 rounded-md border border-border bg-surface px-3 py-2">

@@ -11,7 +11,7 @@ export function Sparkline({
   data,
   width = 60,
   height = 20,
-  color = "#00ffa3",
+  color = "#e0aa0f",
 }: SparklineProps) {
   if (data.length < 2) {
     return <span className="text-[10px] text-dim">--</span>;

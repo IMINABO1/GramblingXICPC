@@ -81,7 +81,7 @@ export function TrendBarChart({ points, height = 200 }: TrendBarChartProps) {
                 y={padding.top + chartHeight - solvedH}
                 width={barWidth}
                 height={solvedH}
-                fill="#00ffa3"
+                fill="#e0aa0f"
                 opacity={0.8}
                 rx={2}
               >

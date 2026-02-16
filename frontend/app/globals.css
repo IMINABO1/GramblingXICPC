@@ -9,9 +9,9 @@
   --color-surface-hover: #1a1a2a;
   --color-border: #1e1e2e;
   --color-border-hover: #3a3a5a;
-  --color-accent: #00ffa3;
-  --color-accent-dim: rgba(0, 255, 163, 0.05);
-  --color-accent-border: rgba(0, 255, 163, 0.3);
+  --color-accent: #e0aa0f;
+  --color-accent-dim: rgba(224, 170, 15, 0.05);
+  --color-accent-border: rgba(224, 170, 15, 0.3);
   --color-danger: #ef4444;
 
   --color-tier-0: #22c55e;

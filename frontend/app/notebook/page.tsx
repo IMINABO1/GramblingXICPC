@@ -10,7 +10,7 @@ import { JournalEditor } from "@/components/journal-editor";
 import { RatingBadge } from "@/components/rating-badge";
 
 const TAG_COLORS = [
-  "#00ffa3",
+  "#e0aa0f",
   "#f59e0b",
   "#3b82f6",
   "#ef4444",

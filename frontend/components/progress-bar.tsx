@@ -6,7 +6,7 @@ interface ProgressBarProps {
 
 export function ProgressBar({
   percentage,
-  color = "#00ffa3",
+  color = "#e0aa0f",
   height = 4,
 }: ProgressBarProps) {
   return (

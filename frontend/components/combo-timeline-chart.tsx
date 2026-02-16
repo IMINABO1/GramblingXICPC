@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { ComboTimelinePoint } from "@/lib/types";
 
 const COMBO_COLORS = [
-  "#00ffa3",
+  "#e0aa0f",
   "#3b82f6",
   "#a855f7",
   "#f59e0b",

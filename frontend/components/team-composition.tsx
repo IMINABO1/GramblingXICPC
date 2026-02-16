@@ -98,7 +98,7 @@ export function TeamComposition() {
                   title="Team A"
                   memberIds={data.suggestion.team_a}
                   profiles={data.profiles}
-                  accent="#00ffa3"
+                  accent="#e0aa0f"
                 />
                 <TeamCard
                   title="Team B"

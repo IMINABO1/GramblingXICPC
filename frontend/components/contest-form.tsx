@@ -214,7 +214,7 @@ export function ContestForm({
   }
 
   const slotColor = (s: TeamSlot | "none") =>
-    s === "Team A" ? "#00ffa3" : s === "Team B" ? "#3b82f6" : "#55556a";
+    s === "Team A" ? "#e0aa0f" : s === "Team B" ? "#3b82f6" : "#55556a";
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 p-4 pt-16">

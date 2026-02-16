@@ -33,7 +33,7 @@ export default function Timeline() {
             <div
               className="absolute -left-[41px] top-1 h-3 w-3 rounded-full border-2 border-background"
               style={{
-                background: idx === 0 ? "#00ffa3" : "#3a3a5a",
+                background: idx === 0 ? "#e0aa0f" : "#3a3a5a",
               }}
             />
 

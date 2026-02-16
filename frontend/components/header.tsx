@@ -82,7 +82,7 @@ export function Header() {
   return (
     <>
       <header className="border-b border-border px-4 py-3">
-        <div className="mx-auto flex max-w-7xl items-center gap-4">
+        <div className="flex items-center gap-4">
           {/* Hamburger — mobile only */}
           <button
             type="button"

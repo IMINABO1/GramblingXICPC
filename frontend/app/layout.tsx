@@ -39,7 +39,7 @@ export default function RootLayout({
         className={`${jetbrainsMono.variable} ${spaceGrotesk.variable} antialiased`}
       >
         <Header />
-        <main className="mx-auto max-w-7xl px-3 py-4 sm:px-4 sm:py-6">{children}</main>
+        <main className="px-4 py-4 sm:px-6 sm:py-6 lg:px-10">{children}</main>
       </body>
     </html>
   );

@@ -304,11 +304,11 @@ function LeaderboardContent() {
               <th className="px-4 py-3 font-medium">#</th>
               <th className="px-4 py-3 font-medium">Member</th>
               <th className="px-4 py-3 font-medium">Solved</th>
-              <th className="px-4 py-3 font-medium">Avg Rating</th>
-              <th className="px-4 py-3 font-medium">Topics</th>
-              <th className="px-4 py-3 font-medium">Streak</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">Avg Rating</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">Topics</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">Streak</th>
               <th className="px-4 py-3 font-medium">This Week</th>
-              <th className="px-4 py-3 font-medium">8-Week Trend</th>
+              <th className="hidden px-4 py-3 font-medium sm:table-cell">8-Week Trend</th>
             </tr>
           </thead>
           <tbody>
@@ -345,7 +345,7 @@ function LeaderboardContent() {
                       <ProgressBar percentage={pct} height={3} />
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-4 py-3 sm:table-cell">
                     {m.avg_rating_solved > 0 ? (
                       <span
                         className="font-mono font-medium"
@@ -357,11 +357,11 @@ function LeaderboardContent() {
                       <span className="text-muted">{"\u2014"}</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-4 py-3 sm:table-cell">
                     <span className="text-foreground">{m.topics_touched}</span>
                     <span className="text-muted">/{total_topics}</span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-4 py-3 sm:table-cell">
                     {m.streak.current_streak > 0 ? (
                       <div>
                         <span className="font-medium text-foreground">
@@ -397,7 +397,7 @@ function LeaderboardContent() {
                       <span className="text-muted">0</span>
                     )}
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="hidden px-4 py-3 sm:table-cell">
                     <WeeklySparkline weeks={m.weekly_solves} />
                   </td>
                 </tr>

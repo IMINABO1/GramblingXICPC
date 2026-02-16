@@ -207,14 +207,14 @@ export function MemberCard({
       </div>
 
       {/* CF Handle */}
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           value={handle}
           onChange={(e) => setHandle(e.target.value)}
           onBlur={saveHandle}
           onKeyDown={(e) => e.key === "Enter" && saveHandle()}
           placeholder="CF handle"
-          className="w-36 rounded border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none focus:border-accent-border"
+          className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none focus:border-accent-border sm:w-36 sm:flex-none"
         />
         <button
           onClick={sync}
@@ -230,14 +230,14 @@ export function MemberCard({
       )}
 
       {/* LC Handle */}
-      <div className="mb-3 flex items-center gap-2">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
         <input
           value={lcHandle}
           onChange={(e) => setLcHandle(e.target.value)}
           onBlur={saveLcHandle}
           onKeyDown={(e) => e.key === "Enter" && saveLcHandle()}
           placeholder="LC handle (optional)"
-          className="w-36 rounded border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none focus:border-yellow-500/50"
+          className="min-w-0 flex-1 rounded border border-border bg-background px-2 py-1 text-[12px] text-foreground outline-none focus:border-yellow-500/50 sm:w-36 sm:flex-none"
         />
         <button
           onClick={syncLC}

@@ -81,3 +81,8 @@
 .pulse-slow {
   animation: pulse-slow 2s ease-in-out infinite;
 }
+
+/* Mobile drawer */
+.body-scroll-lock {
+  overflow: hidden;
+}

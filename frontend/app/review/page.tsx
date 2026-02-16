@@ -135,7 +135,7 @@ function ReviewContent() {
           <h2 className="mb-4 text-[14px] font-medium text-foreground">
             📊 Practice Overview
           </h2>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-6">
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-6">
             <div className="rounded-md bg-background/50 p-3">
               <div className="text-[10px] uppercase tracking-wide text-muted">
                 This Week

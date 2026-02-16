@@ -102,7 +102,7 @@ export default function Regionals() {
   return (
     <div className="fade-in space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-heading text-2xl font-bold">ICPC Regionals Analysis</h1>
           <p className="mt-1 text-sm text-muted">
@@ -125,7 +125,7 @@ export default function Regionals() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatBox label="Contests Analyzed" value={metadata.total_contests} />
         <StatBox label="Total Problems" value={metadata.total_problems} />
         <StatBox
@@ -144,7 +144,7 @@ export default function Regionals() {
           <p className="mb-4 text-sm text-muted">
             Based on historical ICPC regional data, these topics appear most frequently and should be prioritized in training.
           </p>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             {recommendations.recommendations.map((rec) => {
               const topicInfo = topics?.topics[rec.topic];
               const priorityColors = {
@@ -254,7 +254,7 @@ export default function Regionals() {
               {selectedContest?.contest_id === contest.contest_id && (
                 <div className="mt-4 border-t border-border pt-4">
                   <h3 className="mb-3 text-xs font-semibold uppercase text-muted">Topic Breakdown</h3>
-                  <div className="grid grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {Object.entries(contest.analysis.topic_counts)
                       .sort(([, a], [, b]) => b - a)
                       .map(([topicId, count]) => {

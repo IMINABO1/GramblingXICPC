@@ -126,7 +126,7 @@ export function VirtualContestsPanel() {
                         <div className="mb-1 flex items-start justify-between gap-2">
                           <div className="min-w-0 flex-1">
                             <div className="truncate text-[12px] font-medium text-foreground">
-                              {contest.name}
+                              {contest.contest_name}
                             </div>
                             <div className="text-[10px] text-muted">
                               {contest.date} • CF #{contest.cf_contest_id}

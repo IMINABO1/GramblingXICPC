@@ -262,8 +262,8 @@ function ProblemsContent() {
         </button>
       </div>
 
-      {/* Member legend */}
-      <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted">
+      {/* Member legend — hidden on mobile */}
+      <div className="hidden flex-wrap items-center gap-2 text-[11px] text-muted sm:flex">
         <span>Members:</span>
         {members.map((m, idx) => (
           <span
@@ -288,8 +288,8 @@ function ProblemsContent() {
             <div
               className="flex items-center gap-3 rounded-lg border border-transparent px-3 py-2.5 transition-all hover:border-border hover:bg-surface"
             >
-              {/* Per-member solved indicators */}
-              <div className="flex gap-1">
+              {/* Per-member solved indicators — hidden on mobile */}
+              <div className="hidden gap-1 sm:flex">
                 {members.map((m, idx) => {
                   const solved = memberSolvedSets[idx].has(problem.id);
                   return (
@@ -388,10 +388,10 @@ function ProblemsContent() {
               {/* Editorial button */}
               <EditorialButton problemId={problem.id} />
 
-              {/* Topic tag (when showing all topics) */}
+              {/* Topic tag (when showing all topics) — hidden on small screens */}
               {!selectedTopic && topics.topics[problem.topic] && (
                 <span
-                  className="rounded px-1.5 py-0.5 text-[10px]"
+                  className="hidden rounded px-1.5 py-0.5 text-[10px] lg:inline"
                   style={{
                     color:
                       topics.tier_colors[topics.topics[problem.topic].tier],

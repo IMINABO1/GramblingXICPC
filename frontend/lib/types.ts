@@ -434,6 +434,7 @@ export interface RegionalsResponse {
     total_problems: number;
     successful: number;
     failed: number;
+    data_source?: string;
   };
 }
 

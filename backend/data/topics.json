@@ -1,0 +1,29 @@
+{
+  "topics": {
+    "implementation": {"name": "Implementation", "icon": "\u2699\ufe0f", "prereqs": [], "tier": 0},
+    "math_basic": {"name": "Basic Math", "icon": "\ud83d\udd22", "prereqs": [], "tier": 0},
+    "sorting": {"name": "Sorting & Greedy", "icon": "\ud83d\udcca", "prereqs": ["implementation"], "tier": 0},
+    "binary_search": {"name": "Binary Search", "icon": "\ud83c\udfaf", "prereqs": ["sorting"], "tier": 1},
+    "two_pointers": {"name": "Two Pointers", "icon": "\ud83d\udc46", "prereqs": ["sorting"], "tier": 1},
+    "prefix_sums": {"name": "Prefix Sums", "icon": "\u2211", "prereqs": ["implementation"], "tier": 1},
+    "number_theory": {"name": "Number Theory", "icon": "\ud83d\udd10", "prereqs": ["math_basic"], "tier": 1},
+    "bfs_dfs": {"name": "BFS / DFS", "icon": "\ud83c\udf10", "prereqs": ["implementation"], "tier": 1},
+    "shortest_paths": {"name": "Shortest Paths", "icon": "\ud83d\udee4\ufe0f", "prereqs": ["bfs_dfs"], "tier": 2},
+    "dsu": {"name": "Union-Find / DSU", "icon": "\ud83d\udd17", "prereqs": ["bfs_dfs"], "tier": 2},
+    "topo_sort": {"name": "Topological Sort", "icon": "\ud83d\udcd0", "prereqs": ["bfs_dfs"], "tier": 2},
+    "dp_basic": {"name": "DP Fundamentals", "icon": "\ud83d\udce6", "prereqs": ["prefix_sums", "binary_search"], "tier": 2},
+    "trees": {"name": "Trees", "icon": "\ud83c\udf32", "prereqs": ["bfs_dfs", "dp_basic"], "tier": 2},
+    "strings": {"name": "String Algorithms", "icon": "\ud83d\udd24", "prereqs": ["implementation", "prefix_sums"], "tier": 2},
+    "dp_intermediate": {"name": "DP Intermediate", "icon": "\ud83e\udde9", "prereqs": ["dp_basic"], "tier": 3},
+    "seg_tree": {"name": "Segment Trees / BIT", "icon": "\ud83c\udfd7\ufe0f", "prereqs": ["trees", "prefix_sums"], "tier": 3},
+    "combinatorics": {"name": "Combinatorics", "icon": "\ud83c\udfb2", "prereqs": ["number_theory", "dp_basic"], "tier": 3},
+    "game_theory": {"name": "Game Theory", "icon": "\u265f\ufe0f", "prereqs": ["dp_basic", "math_basic"], "tier": 3},
+    "graphs_advanced": {"name": "Advanced Graphs", "icon": "\ud83d\udd78\ufe0f", "prereqs": ["shortest_paths", "dsu", "topo_sort"], "tier": 3},
+    "geometry": {"name": "Geometry", "icon": "\ud83d\udcd0", "prereqs": ["math_basic", "sorting"], "tier": 3},
+    "dp_advanced": {"name": "DP Advanced", "icon": "\ud83e\uddec", "prereqs": ["dp_intermediate", "seg_tree"], "tier": 4},
+    "advanced": {"name": "Advanced Topics", "icon": "\ud83d\ude80", "prereqs": ["graphs_advanced", "dp_advanced"], "tier": 4}
+  },
+  "tier_labels": ["Foundations", "Core", "Intermediate", "Advanced", "Expert"],
+  "tier_colors": ["#22c55e", "#3b82f6", "#a855f7", "#f59e0b", "#ef4444"],
+  "tier_bg": ["rgba(34,197,94,0.08)", "rgba(59,130,246,0.08)", "rgba(168,85,247,0.08)", "rgba(245,158,11,0.08)", "rgba(239,68,68,0.08)"]
+}

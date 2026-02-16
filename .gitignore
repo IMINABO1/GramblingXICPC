@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+venv/
+.venv/
+
+# Data caches (generated, not committed)
+backend/data/cf_problems_raw.json
+backend/data/statements_cache.json
+backend/data/editorials_cache.json
+backend/data/embeddings.npy
+backend/data/problem_ids.json
+backend/data/graph.json
+backend/data/scrape_errors.log
+
+# Keep these tracked
+!backend/data/problems.json
+!backend/data/topics.json
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+nul
+
+# Logs
+*.log
+
+# Environment
+.env

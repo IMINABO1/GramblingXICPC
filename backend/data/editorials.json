@@ -1,0 +1,738 @@
+{
+  "4A": {
+    "url": null,
+    "checked": true
+  },
+  "158A": {
+    "url": "https://codeforces.com/blog/entry/4012",
+    "checked": true
+  },
+  "236A": {
+    "url": "https://codeforces.com/blog/entry/5586",
+    "checked": true
+  },
+  "1353B": {
+    "url": "https://codeforces.com/blog/entry/77309",
+    "checked": true
+  },
+  "1294A": {
+    "url": "https://codeforces.com/blog/entry/73211",
+    "checked": true
+  },
+  "71A": {
+    "url": "https://codeforces.com/blog/entry/1623",
+    "checked": true
+  },
+  "1462C": {
+    "url": "https://codeforces.com/blog/entry/85573",
+    "checked": true
+  },
+  "1560B": {
+    "url": "https://codeforces.com/blog/entry/93960",
+    "checked": true
+  },
+  "1360D": {
+    "url": "https://codeforces.com/blog/entry/77796",
+    "checked": true
+  },
+  "1A": {
+    "url": "https://codeforces.com/blog/entry/85",
+    "checked": true
+  },
+  "266B": {
+    "url": "https://codeforces.com/blog/entry/6494",
+    "checked": true
+  },
+  "1033A": {
+    "url": "https://codeforces.com/blog/entry/62218",
+    "checked": true
+  },
+  "1490C": {
+    "url": "https://codeforces.com/blog/entry/87845",
+    "checked": true
+  },
+  "1490D": {
+    "url": "https://codeforces.com/blog/entry/87845",
+    "checked": true
+  },
+  "115A": {
+    "url": "https://codeforces.com/blog/entry/2662",
+    "checked": true
+  },
+  "1374C": {
+    "url": "https://codeforces.com/blog/entry/79433",
+    "checked": true
+  },
+  "1399C": {
+    "url": "https://codeforces.com/blog/entry/81018",
+    "checked": true
+  },
+  "1541B": {
+    "url": "https://codeforces.com/blog/entry/92093",
+    "checked": true
+  },
+  "1343C": {
+    "url": "https://codeforces.com/blog/entry/76306",
+    "checked": true
+  },
+  "1352C": {
+    "url": "https://codeforces.com/blog/entry/77130",
+    "checked": true
+  },
+  "1511B": {
+    "url": "https://codeforces.com/blog/entry/89562",
+    "checked": true
+  },
+  "1097B": {
+    "url": "https://codeforces.com/blog/entry/64251",
+    "checked": true
+  },
+  "1611E1": {
+    "url": "https://codeforces.com/blog/entry/97205",
+    "checked": true
+  },
+  "1472D": {
+    "url": "https://codeforces.com/blog/entry/86304",
+    "checked": true
+  },
+  "1426D": {
+    "url": "https://codeforces.com/blog/entry/83074",
+    "checked": true
+  },
+  "1520D": {
+    "url": "https://codeforces.com/blog/entry/90310",
+    "checked": true
+  },
+  "1555C": {
+    "url": "https://codeforces.com/blog/entry/93311",
+    "checked": true
+  },
+  "1352D": {
+    "url": "https://codeforces.com/blog/entry/77130",
+    "checked": true
+  },
+  "1187B": {
+    "url": "https://codeforces.com/blog/entry/68060",
+    "checked": true
+  },
+  "1607D": {
+    "url": "https://codeforces.com/blog/entry/96496",
+    "checked": true
+  },
+  "1367C": {
+    "url": "https://codeforces.com/blog/entry/78866",
+    "checked": true
+  },
+  "1433E": {
+    "url": "https://codeforces.com/blog/entry/83841",
+    "checked": true
+  },
+  "189A": {
+    "url": "https://codeforces.com/blog/entry/4520",
+    "checked": true
+  },
+  "1428C": {
+    "url": "https://codeforces.com/blog/entry/83730",
+    "checked": true
+  },
+  "1480B": {
+    "url": "https://codeforces.com/blog/entry/87524",
+    "checked": true
+  },
+  "1176C": {
+    "url": "https://codeforces.com/blog/entry/67530",
+    "checked": true
+  },
+  "1201C": {
+    "url": "https://codeforces.com/blog/entry/68871",
+    "checked": true
+  },
+  "1370C": {
+    "url": "https://codeforces.com/blog/entry/79038",
+    "checked": true
+  },
+  "1324D": {
+    "url": "https://codeforces.com/blog/entry/74661",
+    "checked": true
+  },
+  "1462D": {
+    "url": "https://codeforces.com/blog/entry/85573",
+    "checked": true
+  },
+  "1475C": {
+    "url": "https://codeforces.com/blog/entry/87161",
+    "checked": true
+  },
+  "1245C": {
+    "url": "https://codeforces.com/blog/entry/71039",
+    "checked": true
+  },
+  "1295C": {
+    "url": "https://codeforces.com/blog/entry/73413",
+    "checked": true
+  },
+  "816B": {
+    "url": "https://codeforces.com/blog/entry/52653",
+    "checked": true
+  },
+  "1535C": {
+    "url": "https://codeforces.com/blog/entry/91386",
+    "checked": true
+  },
+  "279B": {
+    "url": "https://codeforces.com/blog/entry/6856",
+    "checked": true
+  },
+  "1537D": {
+    "url": "https://codeforces.com/blog/entry/91835",
+    "checked": true
+  },
+  "1462E": {
+    "url": "https://codeforces.com/blog/entry/91835",
+    "checked": true
+  },
+  "1208B": {
+    "url": "https://codeforces.com/blog/entry/69323",
+    "checked": true
+  },
+  "1203D": {
+    "url": "https://codeforces.com/blog/entry/69323",
+    "checked": true
+  },
+  "1195C": {
+    "url": "https://codeforces.com/blog/entry/68425",
+    "checked": true
+  },
+  "1272D": {
+    "url": "https://codeforces.com/blog/entry/72086",
+    "checked": true
+  },
+  "1355C": {
+    "url": "https://codeforces.com/blog/entry/77323",
+    "checked": true
+  },
+  "1516B": {
+    "url": "https://codeforces.com/blog/entry/89838",
+    "checked": true
+  },
+  "1151C": {
+    "url": "https://codeforces.com/blog/entry/66576",
+    "checked": true
+  },
+  "1354C": {
+    "url": "https://codeforces.com/blog/entry/66576",
+    "checked": true
+  },
+  "271D": {
+    "url": "https://codeforces.com/blog/entry/6659",
+    "checked": true
+  },
+  "1490F": {
+    "url": "https://codeforces.com/blog/entry/87845",
+    "checked": true
+  },
+  "1339C": {
+    "url": "https://codeforces.com/blog/entry/75806",
+    "checked": true
+  },
+  "455A": {
+    "url": "https://codeforces.com/blog/entry/13319",
+    "checked": true
+  },
+  "580C": {
+    "url": "https://codeforces.com/blog/entry/20376",
+    "checked": true
+  },
+  "1263D": {
+    "url": "https://codeforces.com/blog/entry/71803",
+    "checked": true
+  },
+  "1537D2": {
+    "url": "https://codeforces.com/blog/entry/71803",
+    "checked": true
+  },
+  "1436C": {
+    "url": "https://codeforces.com/blog/entry/84008",
+    "checked": true
+  },
+  "1208D": {
+    "url": "https://codeforces.com/blog/entry/69323",
+    "checked": true
+  },
+  "1178D": {
+    "url": "https://codeforces.com/blog/entry/68432",
+    "checked": true
+  },
+  "1398C": {
+    "url": "https://codeforces.com/blog/entry/81410",
+    "checked": true
+  },
+  "1358D": {
+    "url": "https://codeforces.com/blog/entry/77664",
+    "checked": true
+  },
+  "1077D": {
+    "url": "https://codeforces.com/blog/entry/63217",
+    "checked": true
+  },
+  "1623C": {
+    "url": "https://codeforces.com/blog/entry/98385",
+    "checked": true
+  },
+  "2A": {
+    "url": "https://codeforces.com/blog/entry/97",
+    "checked": true
+  },
+  "1352G": {
+    "url": "https://codeforces.com/blog/entry/77130",
+    "checked": true
+  },
+  "1154D": {
+    "url": "https://codeforces.com/blog/entry/66560",
+    "checked": true
+  },
+  "1294D": {
+    "url": "https://codeforces.com/blog/entry/73211",
+    "checked": true
+  },
+  "1514C": {
+    "url": "https://codeforces.com/blog/entry/89771",
+    "checked": true
+  },
+  "1459C": {
+    "url": "https://codeforces.com/blog/entry/85673",
+    "checked": true
+  },
+  "510C": {
+    "url": "https://codeforces.com/blog/entry/16147",
+    "checked": true
+  },
+  "722C": {
+    "url": "https://codeforces.com/blog/entry/47431",
+    "checked": true
+  },
+  "601A": {
+    "url": "https://codeforces.com/blog/entry/21490",
+    "checked": true
+  },
+  "377A": {
+    "url": "https://codeforces.com/blog/entry/10138",
+    "checked": true
+  },
+  "1037D": {
+    "url": "https://codeforces.com/blog/entry/61570",
+    "checked": true
+  },
+  "1288C": {
+    "url": "https://codeforces.com/blog/entry/73061",
+    "checked": true
+  },
+  "1529C": {
+    "url": "https://codeforces.com/blog/entry/90986",
+    "checked": true
+  },
+  "1141F1": {
+    "url": "https://codeforces.com/blog/entry/65994",
+    "checked": true
+  },
+  "1303C": {
+    "url": "https://codeforces.com/blog/entry/73812",
+    "checked": true
+  },
+  "1324E": {
+    "url": "https://codeforces.com/blog/entry/74661",
+    "checked": true
+  },
+  "1157C2": {
+    "url": "https://codeforces.com/blog/entry/66703",
+    "checked": true
+  },
+  "166B": {
+    "url": "https://codeforces.com/blog/entry/4171",
+    "checked": true
+  },
+  "1059C": {
+    "url": "https://codeforces.com/blog/entry/62212",
+    "checked": true
+  },
+  "1498C": {
+    "url": "https://codeforces.com/blog/entry/89069",
+    "checked": true
+  },
+  "1537E1": {
+    "url": "https://codeforces.com/blog/entry/91835",
+    "checked": true
+  },
+  "1144F": {
+    "url": "https://codeforces.com/blog/entry/66284",
+    "checked": true
+  },
+  "1385E": {
+    "url": "https://codeforces.com/blog/entry/80196",
+    "checked": true
+  },
+  "1228C": {
+    "url": "https://codeforces.com/blog/entry/70085",
+    "checked": true
+  },
+  "1538D": {
+    "url": "https://codeforces.com/blog/entry/91602",
+    "checked": true
+  },
+  "460C": {
+    "url": "https://codeforces.com/blog/entry/13437",
+    "checked": true
+  },
+  "1365D": {
+    "url": "https://codeforces.com/blog/entry/78406",
+    "checked": true
+  },
+  "1472E": {
+    "url": "https://codeforces.com/blog/entry/86304",
+    "checked": true
+  },
+  "1411C": {
+    "url": "https://codeforces.com/blog/entry/85746",
+    "checked": true
+  },
+  "1209D": {
+    "url": "https://codeforces.com/blog/entry/69764",
+    "checked": true
+  },
+  "1176E": {
+    "url": "https://codeforces.com/blog/entry/67530",
+    "checked": true
+  },
+  "339D": {
+    "url": "https://codeforces.com/blog/entry/8721",
+    "checked": true
+  },
+  "1194D": {
+    "url": "https://codeforces.com/blog/entry/68338",
+    "checked": true
+  },
+  "118D": {
+    "url": "https://codeforces.com/blog/entry/2799",
+    "checked": true
+  },
+  "126B": {
+    "url": "https://codeforces.com/blog/entry/3094",
+    "checked": true
+  },
+  "977F": {
+    "url": "https://codeforces.com/blog/entry/59281",
+    "checked": true
+  },
+  "1249D2": {
+    "url": "https://codeforces.com/blog/entry/70744",
+    "checked": true
+  },
+  "1076D": {
+    "url": "https://codeforces.com/blog/entry/63115",
+    "checked": true
+  },
+  "1475D": {
+    "url": "https://codeforces.com/blog/entry/87161",
+    "checked": true
+  },
+  "1194D2": {
+    "url": "https://codeforces.com/blog/entry/87161",
+    "checked": true
+  },
+  "1312D": {
+    "url": "https://codeforces.com/blog/entry/74640",
+    "checked": true
+  },
+  "1535D": {
+    "url": "https://codeforces.com/blog/entry/91386",
+    "checked": true
+  },
+  "1213G": {
+    "url": "https://codeforces.com/blog/entry/69433",
+    "checked": true
+  },
+  "1618F": {
+    "url": "https://codeforces.com/blog/entry/97874",
+    "checked": true
+  },
+  "1619F": {
+    "url": "https://codeforces.com/blog/entry/98076",
+    "checked": true
+  },
+  "25D": {
+    "url": "https://codeforces.com/blog/entry/573",
+    "checked": true
+  },
+  "1549D": {
+    "url": "https://codeforces.com/blog/entry/93361",
+    "checked": true
+  },
+  "459D": {
+    "url": "https://codeforces.com/blog/entry/13394",
+    "checked": true
+  },
+  "1062D": {
+    "url": "https://codeforces.com/blog/entry/63136",
+    "checked": true
+  },
+  "1248C": {
+    "url": "https://codeforces.com/blog/entry/70680",
+    "checked": true
+  },
+  "1187C": {
+    "url": "https://codeforces.com/blog/entry/68060",
+    "checked": true
+  },
+  "1401D": {
+    "url": "https://codeforces.com/blog/entry/81697",
+    "checked": true
+  },
+  "1027D": {
+    "url": "https://codeforces.com/blog/entry/61270",
+    "checked": true
+  },
+  "1359D": {
+    "url": "https://codeforces.com/blog/entry/78016",
+    "checked": true
+  },
+  "1248D1": {
+    "url": "https://codeforces.com/blog/entry/70680",
+    "checked": true
+  },
+  "1462F": {
+    "url": "https://codeforces.com/blog/entry/85573",
+    "checked": true
+  },
+  "1513D": {
+    "url": "https://codeforces.com/blog/entry/89520",
+    "checked": true
+  },
+  "1328E": {
+    "url": "https://codeforces.com/blog/entry/75178",
+    "checked": true
+  },
+  "20C": {
+    "url": null,
+    "checked": true
+  },
+  "1092F": {
+    "url": "https://codeforces.com/blog/entry/63911",
+    "checked": true
+  },
+  "1100E": {
+    "url": null,
+    "checked": true
+  },
+  "1183H": {
+    "url": "https://codeforces.com/blog/entry/67938",
+    "checked": true
+  },
+  "1100E2": {
+    "url": "https://codeforces.com/blog/entry/67938",
+    "checked": true
+  },
+  "1463D": {
+    "url": "https://codeforces.com/blog/entry/85618",
+    "checked": true
+  },
+  "825E": {
+    "url": "https://codeforces.com/blog/entry/53317",
+    "checked": true
+  },
+  "1159D": {
+    "url": "https://codeforces.com/blog/entry/66958",
+    "checked": true
+  },
+  "1204D": {
+    "url": "https://codeforces.com/blog/entry/66958",
+    "checked": true
+  },
+  "1313C2": {
+    "url": "https://codeforces.com/blog/entry/74106",
+    "checked": true
+  },
+  "1294F": {
+    "url": "https://codeforces.com/blog/entry/73211",
+    "checked": true
+  },
+  "1092F2": {
+    "url": "https://codeforces.com/blog/entry/73211",
+    "checked": true
+  },
+  "1328E2": {
+    "url": "https://codeforces.com/blog/entry/73211",
+    "checked": true
+  },
+  "1076E": {
+    "url": "https://codeforces.com/blog/entry/63115",
+    "checked": true
+  },
+  "1144G": {
+    "url": "https://codeforces.com/blog/entry/66284",
+    "checked": true
+  },
+  "1311F": {
+    "url": "https://codeforces.com/blog/entry/74185",
+    "checked": true
+  },
+  "1029D": {
+    "url": "https://codeforces.com/blog/entry/61399",
+    "checked": true
+  },
+  "535D": {
+    "url": "https://codeforces.com/blog/entry/17371",
+    "checked": true
+  },
+  "545E": {
+    "url": "https://codeforces.com/blog/entry/17967",
+    "checked": true
+  },
+  "1209E": {
+    "url": "https://codeforces.com/blog/entry/17967",
+    "checked": true
+  },
+  "1152D": {
+    "url": "https://codeforces.com/blog/entry/66587",
+    "checked": true
+  },
+  "1117D": {
+    "url": "https://codeforces.com/blog/entry/65308",
+    "checked": true
+  },
+  "1156D": {
+    "url": "https://codeforces.com/blog/entry/66796",
+    "checked": true
+  },
+  "1061D": {
+    "url": "https://codeforces.com/blog/entry/63352",
+    "checked": true
+  },
+  "1108E2": {
+    "url": "https://codeforces.com/blog/entry/64708",
+    "checked": true
+  },
+  "432D": {
+    "url": "https://codeforces.com/blog/entry/12298",
+    "checked": true
+  },
+  "600E": {
+    "url": "https://codeforces.com/blog/entry/21794",
+    "checked": true
+  },
+  "1525C": {
+    "url": "https://codeforces.com/blog/entry/90729",
+    "checked": true
+  },
+  "1083A": {
+    "url": "https://codeforces.com/blog/entry/63735",
+    "checked": true
+  },
+  "850C": {
+    "url": "https://codeforces.com/blog/entry/54265",
+    "checked": true
+  },
+  "1110D": {
+    "url": "https://codeforces.com/blog/entry/65059",
+    "checked": true
+  },
+  "52C": {
+    "url": "https://codeforces.com/blog/entry/1048",
+    "checked": true
+  },
+  "380C": {
+    "url": "https://codeforces.com/blog/entry/10334",
+    "checked": true
+  },
+  "474F": {
+    "url": "https://codeforces.com/blog/entry/14086",
+    "checked": true
+  },
+  "1139D": {
+    "url": "https://codeforces.com/blog/entry/66067",
+    "checked": true
+  },
+  "1559D2": {
+    "url": "https://codeforces.com/blog/entry/93788",
+    "checked": true
+  },
+  "1093F": {
+    "url": "https://codeforces.com/blog/entry/63807",
+    "checked": true
+  },
+  "1101D": {
+    "url": "https://codeforces.com/blog/entry/64438",
+    "checked": true
+  },
+  "1188B": {
+    "url": "https://codeforces.com/blog/entry/68067",
+    "checked": true
+  },
+  "1059D": {
+    "url": "https://codeforces.com/blog/entry/62212",
+    "checked": true
+  },
+  "936B": {
+    "url": "https://codeforces.com/blog/entry/58017",
+    "checked": true
+  },
+  "1000E": {
+    "url": "https://codeforces.com/blog/entry/60236",
+    "checked": true
+  },
+  "768E": {
+    "url": "https://codeforces.com/blog/entry/50510",
+    "checked": true
+  },
+  "1167F": {
+    "url": "https://codeforces.com/blog/entry/67017",
+    "checked": true
+  },
+  "1097D": {
+    "url": "https://codeforces.com/blog/entry/64251",
+    "checked": true
+  },
+  "960E": {
+    "url": "https://codeforces.com/blog/entry/58754",
+    "checked": true
+  },
+  "786B": {
+    "url": "https://codeforces.com/blog/entry/51083",
+    "checked": true
+  },
+  "1187E": {
+    "url": "https://codeforces.com/blog/entry/68060",
+    "checked": true
+  },
+  "1025D": {
+    "url": "https://codeforces.com/blog/entry/61297",
+    "checked": true
+  },
+  "1197E": {
+    "url": "https://codeforces.com/blog/entry/68553",
+    "checked": true
+  },
+  "1178F": {
+    "url": "https://codeforces.com/blog/entry/68553",
+    "checked": true
+  },
+  "598C": {
+    "url": "https://codeforces.com/blog/entry/21565",
+    "checked": true
+  },
+  "1093G": {
+    "url": "https://codeforces.com/blog/entry/63807",
+    "checked": true
+  },
+  "1039D": {
+    "url": "https://codeforces.com/blog/entry/61638",
+    "checked": true
+  },
+  "1137C": {
+    "url": "https://codeforces.com/blog/entry/65768",
+    "checked": true
+  },
+  "1313E": {
+    "url": "https://codeforces.com/blog/entry/74106",
+    "checked": true
+  }
+}

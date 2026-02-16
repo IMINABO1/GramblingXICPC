@@ -1,0 +1,38 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(\"c:\\\\Users\\\\rober\\\\Documents\\\\iminabo_stuff\\\\code\\\\gravenger\\\\venv\\\\Scripts\\\\python.exe\":*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)",
+      "Bash(venv/Scripts/python:*)",
+      "Bash(npx create-next-app@latest:*)",
+      "Bash(npm install:*)",
+      "Bash(npx next build)",
+      "Bash(npx tsc:*)",
+      "Bash(npm run build:*)",
+      "Bash(wc:*)",
+      "Bash(python3:*)",
+      "Bash(pip install:*)",
+      "Bash(python scripts/build_positions.py:*)",
+      "Bash(python -c:*)",
+      "Bash(npm run dev:*)",
+      "Bash(taskkill:*)",
+      "Bash(netstat:*)",
+      "Bash(tasklist:*)",
+      "Bash(python test_routes.py:*)",
+      "Bash(for pid in 46580 59608 63996 67720)",
+      "Bash(do taskkill //F //PID $pid)",
+      "Bash(done)",
+      "Bash(python -m py_compile:*)",
+      "Bash(for pid in:*)",
+      "Bash(python -m uvicorn:*)",
+      "Bash(powershell -Command \"Get-Process | Where-Object {$_Path -like ''*gravenger*python*'' -or \\($_ProcessName -eq ''python'' -and \\(netstat -ano | findstr '':8000'' | findstr $_Id\\)\\)} | ForEach-Object { Stop-Process -Id $_Id -Force -ErrorAction SilentlyContinue }\")",
+      "Bash(do taskkill //PID $pid //F)",
+      "Bash(python:*)",
+      "Bash(uvicorn:*)",
+      "Bash(wmic process:*)"
+    ]
+  }
+}

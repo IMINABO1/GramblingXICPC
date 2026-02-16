@@ -1,0 +1,12 @@
+{
+  "notes": [
+    {
+      "id": "note_cb437ffa",
+      "member_id": 0,
+      "problem_id": "1555C",
+      "content": "seems like a classic 2d dp and partly greedy but it will be dp for both alice and bob",
+      "created_at": "2026-02-15T23:10:29.592860+00:00",
+      "updated_at": "2026-02-15T23:10:29.592860+00:00"
+    }
+  ]
+}

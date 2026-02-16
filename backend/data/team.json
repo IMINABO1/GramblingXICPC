@@ -1,0 +1,358 @@
+{
+  "members": [
+    {
+      "id": 0,
+      "name": "Captain America",
+      "cf_handle": "iminaboroberts",
+      "solved_curated": [
+        "816B"
+      ],
+      "all_accepted": [
+        "1913A",
+        "1918A",
+        "1925A",
+        "1926A",
+        "1930A",
+        "1930B",
+        "1932A",
+        "1932B",
+        "1935B",
+        "1956B",
+        "1986A",
+        "1991A",
+        "1996A",
+        "1996B",
+        "1999A",
+        "1999C",
+        "2002B",
+        "2007A",
+        "2009A",
+        "2009B",
+        "2020A",
+        "2037A",
+        "2043A",
+        "2043B",
+        "2044A",
+        "2053A",
+        "2057A",
+        "2102B",
+        "2110A",
+        "2110B",
+        "2114B",
+        "2131A",
+        "2184A",
+        "492B",
+        "579A",
+        "816B"
+      ],
+      "last_synced": "2026-02-15T21:39:40.259327+00:00",
+      "problem_timestamps": {
+        "2184A": 1768346661,
+        "2009A": 1725565781,
+        "2131A": 1754839363,
+        "1935B": 1751881015,
+        "2102B": 1750277365,
+        "492B": 1749927866,
+        "816B": 1748914340,
+        "2114B": 1748278172,
+        "2110B": 1748101941,
+        "2110A": 1748099692,
+        "2037A": 1731859816,
+        "2057A": 1736002897,
+        "2053A": 1735402794,
+        "2043B": 1735063433,
+        "2043A": 1735053277,
+        "579A": 1735012284,
+        "2044A": 1734279786,
+        "2020A": 1727626697,
+        "2009B": 1725567915,
+        "2007A": 1725034663,
+        "2002B": 1723391254,
+        "1999C": 1722961793,
+        "1999A": 1722955518,
+        "1991A": 1722178755,
+        "1996B": 1722010674,
+        "1996A": 1722005552,
+        "1986A": 1719154958,
+        "1956B": 1713022655,
+        "1926A": 1708353668,
+        "1932B": 1708262709,
+        "1932A": 1708261318,
+        "1930B": 1708183913,
+        "1930A": 1708181333,
+        "1918A": 1706627745,
+        "1925A": 1706373777,
+        "1913A": 1702919430
+      },
+      "lc_handle": "iminaboroberts",
+      "lc_data": {
+        "tag_counts_raw": {
+          "advanced": [
+            {
+              "tagName": "Rolling Hash",
+              "tagSlug": "rolling-hash",
+              "problemsSolved": 1
+            },
+            {
+              "tagName": "Backtracking",
+              "tagSlug": "backtracking",
+              "problemsSolved": 2
+            },
+            {
+              "tagName": "Dynamic Programming",
+              "tagSlug": "dynamic-programming",
+              "problemsSolved": 14
+            },
+            {
+              "tagName": "Divide and Conquer",
+              "tagSlug": "divide-and-conquer",
+              "problemsSolved": 1
+            },
+            {
+              "tagName": "Trie",
+              "tagSlug": "trie",
+              "problemsSolved": 4
+            },
+            {
+              "tagName": "Union-Find",
+              "tagSlug": "union-find",
+              "problemsSolved": 1
+            },
+            {
+              "tagName": "Topological Sort",
+              "tagSlug": "topological-sort",
+              "problemsSolved": 2
+            }
+          ],
+          "intermediate": [
+            {
+              "tagName": "Tree",
+              "tagSlug": "tree",
+              "problemsSolved": 2
+            },
+            {
+              "tagName": "Binary Tree",
+              "tagSlug": "binary-tree",
+              "problemsSolved": 2
+            },
+            {
+              "tagName": "Hash Table",
+              "tagSlug": "hash-table",
+              "problemsSolved": 15
+            },
+            {
+              "tagName": "Graph Theory",
+              "tagSlug": "graph",
+              "problemsSolved": 3
+            },
+            {
+              "tagName": "Greedy",
+              "tagSlug": "greedy",
+              "problemsSolved": 4
+            },
+            {
+              "tagName": "Binary Search",
+              "tagSlug": "binary-search",
+              "problemsSolved": 4
+            },
+            {
+              "tagName": "Depth-First Search",
+              "tagSlug": "depth-first-search",
+              "problemsSolved": 3
+            },
+            {
+              "tagName": "Breadth-First Search",
+              "tagSlug": "breadth-first-search",
+              "problemsSolved": 6
+            },
+            {
+              "tagName": "Recursion",
+              "tagSlug": "recursion",
+              "problemsSolved": 4
+            },
+            {
+              "tagName": "Sliding Window",
+              "tagSlug": "sliding-window",
+              "problemsSolved": 5
+            },
+            {
+              "tagName": "Bit Manipulation",
+              "tagSlug": "bit-manipulation",
+              "problemsSolved": 4
+            },
+            {
+              "tagName": "Math",
+              "tagSlug": "math",
+              "problemsSolved": 10
+            },
+            {
+              "tagName": "Design",
+              "tagSlug": "design",
+              "problemsSolved": 5
+            }
+          ],
+          "fundamental": [
+            {
+              "tagName": "Array",
+              "tagSlug": "array",
+              "problemsSolved": 38
+            },
+            {
+              "tagName": "Matrix",
+              "tagSlug": "matrix",
+              "problemsSolved": 5
+            },
+            {
+              "tagName": "String",
+              "tagSlug": "string",
+              "problemsSolved": 16
+            },
+            {
+              "tagName": "Simulation",
+              "tagSlug": "simulation",
+              "problemsSolved": 5
+            },
+            {
+              "tagName": "Enumeration",
+              "tagSlug": "enumeration",
+              "problemsSolved": 3
+            },
+            {
+              "tagName": "Sorting",
+              "tagSlug": "sorting",
+              "problemsSolved": 7
+            },
+            {
+              "tagName": "Stack",
+              "tagSlug": "stack",
+              "problemsSolved": 2
+            },
+            {
+              "tagName": "Queue",
+              "tagSlug": "queue",
+              "problemsSolved": 1
+            },
+            {
+              "tagName": "Linked List",
+              "tagSlug": "linked-list",
+              "problemsSolved": 6
+            },
+            {
+              "tagName": "Two Pointers",
+              "tagSlug": "two-pointers",
+              "problemsSolved": 9
+            }
+          ]
+        },
+        "difficulty_stats": {
+          "All": 71,
+          "Easy": 34,
+          "Medium": 29,
+          "Hard": 8
+        },
+        "topic_skill": {
+          "implementation": 80.0,
+          "strings": 20.0,
+          "sorting": 7.0,
+          "two_pointers": 14.0,
+          "trees": 4.0,
+          "bfs_dfs": 14.0,
+          "graphs_advanced": 1.5,
+          "binary_search": 4.0,
+          "math_basic": 14.0,
+          "dp_advanced": 14.0,
+          "dsu": 1.0,
+          "topo_sort": 2.0
+        },
+        "estimated_cf_rating": 1328.1690140845071,
+        "lc_synced": "2026-02-16T03:41:35.942601+00:00"
+      },
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 1,
+      "name": "Member 2",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 2,
+      "name": "Member 3",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 3,
+      "name": "Member 4",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 4,
+      "name": "Member 5",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 5,
+      "name": "Member 6",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 6,
+      "name": "Member 7",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    },
+    {
+      "id": 7,
+      "name": "Member 8",
+      "cf_handle": null,
+      "solved_curated": [],
+      "all_accepted": [],
+      "last_synced": null,
+      "lc_handle": null,
+      "lc_data": null,
+      "solve_quality": {},
+      "editorial_flags": {}
+    }
+  ]
+}

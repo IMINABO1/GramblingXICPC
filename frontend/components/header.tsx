@@ -105,8 +105,10 @@ export function Header() {
             </svg>
           </button>
 
-          {/* Diamond logo */}
-          <DiamondLogo />
+          {/* Diamond logo — centered on mobile */}
+          <div className="flex flex-1 justify-end md:flex-none md:justify-start">
+            <DiamondLogo />
+          </div>
 
           {/* Desktop nav */}
           <nav className="hidden gap-1 md:flex">

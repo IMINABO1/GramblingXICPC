@@ -6,3 +6,5 @@ numpy
 pydantic
 cloudscraper
 faiss-cpu
+python-dotenv
+huggingface_hub

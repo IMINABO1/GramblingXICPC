@@ -2,16 +2,29 @@
 
 import json
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any
 
 import numpy as np
-import requests
+from huggingface_hub import InferenceClient
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
-HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+HF_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
+
+# Lazy-loaded HF client singleton
+_hf_client: InferenceClient | None = None
+
+
+def _get_hf_client() -> InferenceClient:
+    """Get or create the HuggingFace InferenceClient."""
+    global _hf_client
+    if _hf_client is None:
+        token = os.environ.get("HF_API_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
+        _hf_client = InferenceClient(token=token)
+    return _hf_client
 
 # Lazy-loaded module-level singletons
 _faiss_index = None
@@ -58,9 +71,9 @@ def _embed_text(text: str) -> np.ndarray:
 
     Returns a normalized (1, 384) float32 array compatible with the FAISS index.
     """
-    resp = requests.post(HF_API_URL, json={"inputs": text}, timeout=15)
-    resp.raise_for_status()
-    vec = np.array(resp.json(), dtype=np.float32).reshape(1, -1)
+    client = _get_hf_client()
+    result = client.feature_extraction(text, model=HF_MODEL)
+    vec = np.array(result, dtype=np.float32).reshape(1, -1)
     # L2-normalize to match pre-computed embeddings
     norm = np.linalg.norm(vec)
     if norm > 0:

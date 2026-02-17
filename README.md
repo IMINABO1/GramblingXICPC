@@ -122,6 +122,10 @@ pip install -r requirements.txt
 
 # Run the API server (from project root)
 python -m uvicorn backend.main:app --reload
+
+# Or run the backend in the backend folder as
+python -m uvicorn main:app --reload
+
 # Server runs at http://localhost:8000
 # API docs at http://localhost:8000/docs
 ```

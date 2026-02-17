@@ -2,8 +2,15 @@
 
 import logging
 from contextlib import asynccontextmanager
+from pathlib import Path
 
+from dotenv import load_dotenv
 from fastapi import FastAPI
+
+# Load .env from backend/ directory (or project root)
+_backend_dir = Path(__file__).parent
+load_dotenv(_backend_dir / ".env")
+load_dotenv(_backend_dir.parent / ".env")
 from fastapi.middleware.cors import CORSMiddleware
 
 from routers import codeforces, contests, editorials, graph, journals, leaderboard, notes, problems, recommendations, regionals, review, rotations, solve_quality, tags, team, upsolve
@@ -13,6 +20,14 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Build curated graph on startup if missing (e.g. fresh Heroku deploy)
+    try:
+        from services.graph_builder import build_curated_graph
+        logger.info("Checking for graph.json...")
+        build_curated_graph()
+    except Exception as e:
+        logger.warning(f"Could not build curated graph: {e}")
+
     # Pre-load embedding model and FAISS index on startup to avoid cold-start 500s
     try:
         from services.note_embeddings import _load_index

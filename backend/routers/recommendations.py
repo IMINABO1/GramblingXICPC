@@ -130,8 +130,8 @@ async def get_recommendations(
     Otherwise, recommendations are based on the member's weakest topics and difficulty progression.
     """
     graph = _load_graph()
-    if not graph:
-        raise HTTPException(status_code=404, detail="Graph not built yet.")
+    if not graph and seed_problem:
+        raise HTTPException(status_code=404, detail="Graph not built yet. Seed-based recommendations require the graph.")
 
     problems = _load_problems()
     if not problems:

@@ -2,6 +2,7 @@
 
 import json
 import math
+import os
 import re
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,14 @@ import requests
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
-HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2"
+
+def _hf_headers() -> dict[str, str]:
+    """Build auth headers for the HF Inference API."""
+    token = os.environ.get("HF_API_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
+    if token:
+        return {"Authorization": f"Bearer {token}"}
+    return {}
 
 # Lazy-loaded module-level singletons
 _faiss_index = None
@@ -58,7 +66,7 @@ def _embed_text(text: str) -> np.ndarray:
 
     Returns a normalized (1, 384) float32 array compatible with the FAISS index.
     """
-    resp = requests.post(HF_API_URL, json={"inputs": text}, timeout=15)
+    resp = requests.post(HF_API_URL, json={"inputs": text}, headers=_hf_headers(), timeout=15)
     resp.raise_for_status()
     vec = np.array(resp.json(), dtype=np.float32).reshape(1, -1)
     # L2-normalize to match pre-computed embeddings

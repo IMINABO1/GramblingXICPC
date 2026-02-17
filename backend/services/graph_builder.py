@@ -4,6 +4,8 @@ Runs on startup if graph.json is missing (e.g. fresh Heroku deploy).
 Builds a similarity graph from the ~184 curated problems using topic, rating,
 and name similarity — no external APIs or ML libraries needed.
 
+If HF_API_TOKEN is set, uses HuggingFace embeddings for higher quality.
+
 For the full 10K+ problem graph with embedding-based similarity, use
 scripts/build_graph.py instead.
 """
@@ -23,8 +25,7 @@ logger = logging.getLogger(__name__)
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
-# HF Inference API (used when HF_API_TOKEN is set for higher quality embeddings)
-HF_ROUTER_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2"
+HF_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 BATCH_SIZE = 50
 
 
@@ -69,13 +70,19 @@ def _compute_similarity(p1: dict[str, Any], p2: dict[str, Any]) -> float:
 
 def _try_hf_embeddings(problems: list[dict[str, Any]], problem_ids: list[str]) -> dict[str, list[dict[str, Any]]] | None:
     """Try to build graph using HF API embeddings. Returns None if unavailable."""
-    import requests
-
     token = os.environ.get("HF_API_TOKEN") or os.environ.get("HUGGINGFACE_TOKEN")
     if not token:
         return None
 
     logger.info("HF_API_TOKEN found, using embedding-based graph...")
+
+    try:
+        from huggingface_hub import InferenceClient
+    except ImportError:
+        logger.warning("huggingface_hub not installed, falling back to metadata graph.")
+        return None
+
+    client = InferenceClient(token=token)
 
     # Build text representations
     texts = []
@@ -87,15 +94,15 @@ def _try_hf_embeddings(problems: list[dict[str, Any]], problem_ids: list[str]) -
         texts.append(f"{name} | topic: {topic} | difficulty: {tier} ({rating})")
 
     # Embed via HF API in batches
-    headers = {"Authorization": f"Bearer {token}"}
     all_embeddings = []
     for i in range(0, len(texts), BATCH_SIZE):
         batch = texts[i : i + BATCH_SIZE]
-        logger.info(f"  Embedding batch {i // BATCH_SIZE + 1}/{(len(texts) + BATCH_SIZE - 1) // BATCH_SIZE}...")
+        batch_num = i // BATCH_SIZE + 1
+        total_batches = (len(texts) + BATCH_SIZE - 1) // BATCH_SIZE
+        logger.info(f"  Embedding batch {batch_num}/{total_batches}...")
         try:
-            resp = requests.post(HF_ROUTER_URL, json={"inputs": batch}, headers=headers, timeout=60)
-            resp.raise_for_status()
-            all_embeddings.append(np.array(resp.json(), dtype=np.float32))
+            results = [client.feature_extraction(t, model=HF_MODEL) for t in batch]
+            all_embeddings.append(np.array(results, dtype=np.float32))
         except Exception as e:
             logger.warning(f"  HF API failed: {e}")
             return None

@@ -7,14 +7,16 @@ from pathlib import Path
 from typing import Any
 
 import numpy as np
+import requests
 
 DATA_DIR = Path(__file__).parent.parent / "data"
+
+HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
 
 # Lazy-loaded module-level singletons
 _faiss_index = None
 _embeddings: np.ndarray | None = None
 _problem_ids: list[str] | None = None
-_model = None
 _cf_ratings: dict[str, int] | None = None
 
 
@@ -51,16 +53,19 @@ def _load_index() -> tuple[Any, np.ndarray, list[str]]:
     return _faiss_index, _embeddings, _problem_ids
 
 
-def _get_model():
-    """Load sentence-transformers model. Cached after first call."""
-    global _model
-    if _model is not None:
-        return _model
+def _embed_text(text: str) -> np.ndarray:
+    """Embed text via the HuggingFace Inference API (all-MiniLM-L6-v2).
 
-    from sentence_transformers import SentenceTransformer
-
-    _model = SentenceTransformer("all-MiniLM-L6-v2")
-    return _model
+    Returns a normalized (1, 384) float32 array compatible with the FAISS index.
+    """
+    resp = requests.post(HF_API_URL, json={"inputs": text}, timeout=15)
+    resp.raise_for_status()
+    vec = np.array(resp.json(), dtype=np.float32).reshape(1, -1)
+    # L2-normalize to match pre-computed embeddings
+    norm = np.linalg.norm(vec)
+    if norm > 0:
+        vec /= norm
+    return vec
 
 
 def _load_problems_map() -> dict[str, dict[str, Any]]:
@@ -140,11 +145,7 @@ def recommend_from_text(
     exclude_ids = exclude_ids or set()
 
     index, _, problem_ids = _load_index()
-    model = _get_model()
-
-    # Embed and normalize the query text
-    query_vec = model.encode([text], normalize_embeddings=True)
-    query_vec = np.array(query_vec, dtype=np.float32)
+    query_vec = _embed_text(text)
 
     # Fetch extra candidates so we have enough after filtering + re-ranking
     search_k = max(limit * 3, limit + len(exclude_ids) + 40)

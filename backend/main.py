@@ -15,13 +15,12 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     # Pre-load embedding model and FAISS index on startup to avoid cold-start 500s
     try:
-        from services.note_embeddings import _load_index, _get_model
-        logger.info("Pre-loading FAISS index and embedding model...")
+        from services.note_embeddings import _load_index
+        logger.info("Pre-loading FAISS index...")
         _load_index()
-        _get_model()
-        logger.info("Embedding service ready.")
+        logger.info("FAISS index ready.")
     except Exception as e:
-        logger.warning(f"Could not pre-load embedding service: {e}")
+        logger.warning(f"Could not pre-load FAISS index: {e}")
     yield
 
 

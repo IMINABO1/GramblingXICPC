@@ -93,18 +93,18 @@ def _try_hf_embeddings(problems: list[dict[str, Any]], problem_ids: list[str]) -
         tier = "beginner" if rating <= 1200 else "intermediate" if rating <= 1600 else "advanced" if rating <= 2000 else "expert"
         texts.append(f"{name} | topic: {topic} | difficulty: {tier} ({rating})")
 
-    # Embed via HF API in batches
+    # Embed via HF API in batches (single API call per batch)
     all_embeddings = []
     for i in range(0, len(texts), BATCH_SIZE):
         batch = texts[i : i + BATCH_SIZE]
         batch_num = i // BATCH_SIZE + 1
         total_batches = (len(texts) + BATCH_SIZE - 1) // BATCH_SIZE
-        logger.info(f"  Embedding batch {batch_num}/{total_batches}...")
+        logger.info(f"  Embedding batch {batch_num}/{total_batches} ({len(batch)} texts)...")
         try:
-            results = [client.feature_extraction(t, model=HF_MODEL) for t in batch]
+            results = client.feature_extraction(batch, model=HF_MODEL)
             all_embeddings.append(np.array(results, dtype=np.float32))
         except Exception as e:
-            logger.warning(f"  HF API failed: {e}")
+            logger.warning(f"  HF API batch failed: {e}")
             return None
 
     embeddings = np.vstack(all_embeddings)

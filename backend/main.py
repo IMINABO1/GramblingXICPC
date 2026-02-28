@@ -26,16 +26,16 @@ async def lifespan(app: FastAPI):
         logger.info("Checking for graph.json...")
         build_curated_graph()
     except Exception as e:
-        logger.warning(f"Could not build curated graph: {e}")
+        logger.warning(f"Could not build curated graph: {e} — graph endpoints may be unavailable")
 
-    # Pre-load embedding model and FAISS index on startup to avoid cold-start 500s
+    # Pre-load FAISS index for note-based recommendations (not critical for other endpoints)
     try:
         from services.note_embeddings import _load_index
         logger.info("Pre-loading FAISS index...")
         _load_index()
         logger.info("FAISS index ready.")
     except Exception as e:
-        logger.warning(f"Could not pre-load FAISS index: {e}")
+        logger.warning(f"Could not pre-load FAISS index: {e} — note recommendations disabled, all other endpoints still work")
     yield
 
 

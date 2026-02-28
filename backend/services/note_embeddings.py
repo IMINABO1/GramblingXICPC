@@ -9,6 +9,8 @@ from typing import Any
 
 import numpy as np
 from huggingface_hub import InferenceClient
+import faiss
+
 
 DATA_DIR = Path(__file__).parent.parent / "data"
 
@@ -52,8 +54,6 @@ def _load_index() -> tuple[Any, np.ndarray, list[str]]:
 
     if _faiss_index is not None and _embeddings is not None and _problem_ids is not None:
         return _faiss_index, _embeddings, _problem_ids
-
-    import faiss
 
     _embeddings = np.load(DATA_DIR / "embeddings.npy")
     with open(DATA_DIR / "problem_ids.json", "r", encoding="utf-8") as f:

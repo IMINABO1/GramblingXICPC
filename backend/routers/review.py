@@ -6,26 +6,22 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import db_ops
+from database import get_db
 
 router = APIRouter()
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 
-def load_team() -> dict[str, Any]:
-    """Load team data."""
-    with open(DATA_DIR / "team.json", "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def load_problems() -> list[dict[str, Any]]:
-    """Load curated problems."""
+def _load_problems() -> list[dict[str, Any]]:
     with open(DATA_DIR / "problems.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_topics() -> dict[str, Any]:
-    """Load topics metadata."""
+def _load_topics() -> dict[str, Any]:
     with open(DATA_DIR / "topics.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -33,33 +29,18 @@ def load_topics() -> dict[str, Any]:
 def compute_topic_last_solved(
     member: dict[str, Any], problems: list[dict[str, Any]]
 ) -> dict[str, dict[str, Any]]:
-    """Compute per-topic last-solved timestamp and problem count.
-
-    Returns dict mapping topic_id to:
-    {
-        "last_solved_timestamp": Unix seconds (int),
-        "last_solved_date": ISO date string,
-        "days_since": int,
-        "problems_solved": int,
-        "last_problem_id": str,
-        "last_problem_name": str
-    }
-    """
     timestamps = member.get("problem_timestamps", {})
     solved_set = set(member.get("solved_curated", []))
 
-    # Group problems by topic
     topic_problems: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for prob in problems:
         if prob.get("curated") and prob["id"] in solved_set:
             topic_problems[prob["topic"]].append(prob)
 
-    # Compute per-topic stats
     topic_stats: dict[str, dict[str, Any]] = {}
     now = datetime.now(timezone.utc)
 
     for topic_id, probs in topic_problems.items():
-        # Find most recent solve in this topic
         most_recent = 0
         most_recent_prob = None
         for prob in probs:
@@ -87,29 +68,21 @@ def compute_topic_last_solved(
 
 
 @router.get("/{member_id}")
-def get_review_topics(
+async def get_review_topics(
     member_id: int,
-    stale_days: int = Query(default=30, ge=1, le=365, description="Days since last practice to flag as stale"),
-    limit: int = Query(default=10, ge=1, le=50, description="Max number of review problems per topic"),
+    stale_days: int = Query(default=30, ge=1, le=365),
+    limit: int = Query(default=10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    """Get topics needing review for a member.
-
-    Returns topics not practiced in `stale_days` with suggested review problems.
-    """
-    team = load_team()
-    problems = load_problems()
-    topics_meta = load_topics()
-
-    # Find member
-    member = None
-    for m in team["members"]:
-        if m["id"] == member_id:
-            member = m
-            break
-    if member is None:
+    """Get topics needing review for a member."""
+    member_orm = await db_ops.get_member(db, member_id)
+    if member_orm is None:
         raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
 
-    # Check if member has synced submissions
+    member = db_ops.member_to_dict(member_orm)
+    problems = _load_problems()
+    topics_meta = _load_topics()
+
     if not member.get("problem_timestamps"):
         return {
             "member_id": member_id,
@@ -119,17 +92,13 @@ def get_review_topics(
             "message": "No submission history synced. Sync CF handle first.",
         }
 
-    # Compute per-topic stats
     topic_stats = compute_topic_last_solved(member, problems)
 
-    # Flag stale topics
     stale_topics = []
     for topic_id, stats in topic_stats.items():
         if stats["days_since"] >= stale_days:
-            # Get topic metadata
             topic_info = topics_meta["topics"].get(topic_id, {})
 
-            # Get review problems (curated problems in this topic not yet solved)
             solved_set = set(member.get("solved_curated", []))
             review_problems = [
                 {
@@ -157,7 +126,6 @@ def get_review_topics(
                 "review_count": len(review_problems),
             })
 
-    # Sort by days_since (most stale first)
     stale_topics.sort(key=lambda t: t["days_since"], reverse=True)
 
     return {
@@ -171,23 +139,15 @@ def get_review_topics(
 
 
 @router.get("/{member_id}/stats")
-def get_review_stats(member_id: int) -> dict[str, Any]:
-    """Get review statistics for a member across all topics.
-
-    Returns overview of topic practice recency.
-    """
-    team = load_team()
-    problems = load_problems()
-    topics_meta = load_topics()
-
-    # Find member
-    member = None
-    for m in team["members"]:
-        if m["id"] == member_id:
-            member = m
-            break
-    if member is None:
+async def get_review_stats(member_id: int, db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
+    """Get review statistics for a member across all topics."""
+    member_orm = await db_ops.get_member(db, member_id)
+    if member_orm is None:
         raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
+
+    member = db_ops.member_to_dict(member_orm)
+    problems = _load_problems()
+    topics_meta = _load_topics()
 
     if not member.get("problem_timestamps"):
         return {
@@ -198,10 +158,8 @@ def get_review_stats(member_id: int) -> dict[str, Any]:
             "message": "No submission history synced.",
         }
 
-    # Compute per-topic stats
     topic_stats = compute_topic_last_solved(member, problems)
 
-    # Bucket by recency
     buckets = {
         "this_week": 0,
         "this_month": 0,
@@ -223,7 +181,6 @@ def get_review_stats(member_id: int) -> dict[str, Any]:
         else:
             buckets["6_months_plus"] += 1
 
-    # All topics
     all_topics = list(topics_meta["topics"].keys())
     practiced_topics = len(topic_stats)
     untouched_topics = len(all_topics) - practiced_topics

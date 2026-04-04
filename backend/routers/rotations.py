@@ -3,11 +3,12 @@
 from itertools import combinations
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from routers.contests import load_contests
-from services.handle_sync import load_team
+import db_ops
+from database import get_db
 from services.team_profiles import compute_profiles, load_problems, team_coverage
 
 router = APIRouter()
@@ -80,20 +81,14 @@ class TimelineResponse(BaseModel):
 
 
 def _combo_key(member_ids: list[int]) -> str:
-    """Canonical combo identifier: sorted IDs joined by hyphens."""
     return "-".join(str(i) for i in sorted(member_ids))
 
 
-def _derive_combo_data() -> dict[str, list[dict[str, Any]]]:
-    """Derive per-combo contest records from contests.json.
-
-    Returns {combo_key: [list of per-contest records]}.
-    Only includes teams with 2 or 3 members.
-    """
-    data = load_contests()
+def _derive_combo_data_from_contests(contests: list[dict[str, Any]]) -> dict[str, list[dict[str, Any]]]:
+    """Derive per-combo contest records from contest dicts."""
     combo_records: dict[str, list[dict[str, Any]]] = {}
 
-    for c in data["contests"]:
+    for c in contests:
         results = c.get("results", [])
         total_problems = len(results)
 
@@ -133,7 +128,6 @@ def _build_combo_stats(
     combo_records: dict[str, list[dict[str, Any]]],
     name_map: dict[int, str],
 ) -> list[ComboStats]:
-    """Build aggregate ComboStats from raw combo records."""
     result: list[ComboStats] = []
 
     for key, records in combo_records.items():
@@ -175,28 +169,34 @@ def _build_combo_stats(
     return result
 
 
+async def _get_contest_dicts(db: AsyncSession) -> list[dict[str, Any]]:
+    contests = await db_ops.get_all_contests(db)
+    return [db_ops.contest_to_dict(c) for c in contests]
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
 
 
 @router.get("/combos")
-async def list_combos() -> list[ComboStats]:
+async def list_combos(db: AsyncSession = Depends(get_db)) -> list[ComboStats]:
     """All tested groups (trios and duos) with aggregate performance stats."""
-    combo_records = _derive_combo_data()
-    team_data = load_team()
-    name_map = {m["id"]: m["name"] for m in team_data["members"]}
+    contest_dicts = await _get_contest_dicts(db)
+    combo_records = _derive_combo_data_from_contests(contest_dicts)
+    members = await db_ops.get_all_members(db)
+    name_map = {m.id: m.name for m in members}
     return _build_combo_stats(combo_records, name_map)
 
 
 @router.get("/suggest")
-async def suggest_next() -> SuggestResponse:
+async def suggest_next(db: AsyncSession = Depends(get_db)) -> SuggestResponse:
     """Suggest the next full partition of active members into teams."""
-    team_data = load_team()
-    members = team_data["members"]
-    active_members = [m for m in members if m.get("active", True)]
-    active_ids = [m["id"] for m in active_members]
-    name_map = {m["id"]: m["name"] for m in members}
+    members = await db_ops.get_all_members(db)
+    active_members = [m for m in members if m.active]
+    active_member_dicts = [db_ops.member_to_dict(m) for m in active_members]
+    active_ids = [m.id for m in active_members]
+    name_map = {m.id: m.name for m in members}
     n = len(active_ids)
 
     if n < 2:
@@ -208,25 +208,20 @@ async def suggest_next() -> SuggestResponse:
             active_count=n,
         )
 
-    # All possible trios from active members
     all_trios = list(combinations(active_ids, 3)) if n >= 3 else []
     total_possible = len(all_trios)
 
-    # Which trios have been tested
-    combo_records = _derive_combo_data()
+    contest_dicts = await _get_contest_dicts(db)
+    combo_records = _derive_combo_data_from_contests(contest_dicts)
     tested_keys = set(combo_records.keys())
     tested_trio_count = sum(1 for t in all_trios if _combo_key(list(t)) in tested_keys)
 
-    # Load profiles for coverage tiebreaking
     problems = load_problems()
-    profiles = compute_profiles(active_members, problems)
+    profiles = compute_profiles(active_member_dicts, problems)
 
-    # Find the best partition: floor(n/3) trios + remainder
     num_trios = n // 3
-    remainder = n % 3
 
     if num_trios == 0:
-        # Only a duo or solo
         teams = [SuggestedTeam(
             member_ids=active_ids,
             member_names=[name_map.get(i, f"#{i}") for i in active_ids],
@@ -240,7 +235,6 @@ async def suggest_next() -> SuggestResponse:
             active_count=n,
         )
 
-    # Score partitions: try to find one with untested trios, then best coverage
     best_partition: list[list[int]] | None = None
     best_score = -1.0
     best_has_untested = False
@@ -257,17 +251,14 @@ async def suggest_next() -> SuggestResponse:
                 if leftover:
                     partition.append(leftover)
 
-                # Check if any trio in this partition is untested
                 has_untested = any(
                     _combo_key(team) not in tested_keys
                     for team in partition if len(team) == 3
                 )
 
-                # Score: min coverage across all teams
                 coverages = [sum(team_coverage(team, profiles).values()) for team in partition]
                 score = min(coverages)
 
-                # Prefer partitions with untested trios, then by score
                 if has_untested and not best_has_untested:
                     best_partition = partition
                     best_score = score
@@ -276,7 +267,6 @@ async def suggest_next() -> SuggestResponse:
                     best_partition = partition
                     best_score = score
         else:
-            # Only 1 trio
             leftover = remaining_after_first
             partition = [list(first_trio)]
             if leftover:
@@ -318,14 +308,14 @@ async def suggest_next() -> SuggestResponse:
 
 
 @router.get("/rankings")
-async def rank_combos() -> list[ComboRanking]:
+async def rank_combos(db: AsyncSession = Depends(get_db)) -> list[ComboRanking]:
     """Rank all tested combos by empirical performance."""
-    combo_records = _derive_combo_data()
-    team_data = load_team()
-    name_map = {m["id"]: m["name"] for m in team_data["members"]}
+    contest_dicts = await _get_contest_dicts(db)
+    combo_records = _derive_combo_data_from_contests(contest_dicts)
+    members = await db_ops.get_all_members(db)
+    name_map = {m.id: m.name for m in members}
     combos = _build_combo_stats(combo_records, name_map)
 
-    # Sort: primary by solve_rate desc, secondary by avg_solve_time asc
     combos.sort(
         key=lambda c: (-c.solve_rate, c.avg_solve_time if c.avg_solve_time is not None else float("inf"))
     )
@@ -344,9 +334,10 @@ async def rank_combos() -> list[ComboRanking]:
 
 
 @router.get("/timeline")
-async def combo_timeline() -> TimelineResponse:
+async def combo_timeline(db: AsyncSession = Depends(get_db)) -> TimelineResponse:
     """Performance timeline per combo, for line chart visualization."""
-    combo_records = _derive_combo_data()
+    contest_dicts = await _get_contest_dicts(db)
+    combo_records = _derive_combo_data_from_contests(contest_dicts)
 
     combos: dict[str, list[ComboTimelinePoint]] = {}
     for key, records in combo_records.items():

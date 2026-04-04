@@ -1,16 +1,14 @@
 """Contests router — virtual contest tracking and trends."""
 
-import json
-import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-DATA_DIR = Path(__file__).parent.parent / "data"
-CONTESTS_FILE = DATA_DIR / "contests.json"
+import db_ops
+from database import get_db
 
 router = APIRouter()
 
@@ -90,42 +88,23 @@ class TrendsResponse(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def load_contests() -> dict[str, Any]:
-    if not CONTESTS_FILE.exists():
-        return {"contests": []}
-    with open(CONTESTS_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def save_contests(data: dict[str, Any]) -> None:
-    with open(CONTESTS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def _find_contest(data: dict[str, Any], contest_id: str) -> dict[str, Any]:
-    for c in data["contests"]:
-        if c["id"] == contest_id:
-            return c
-    raise HTTPException(status_code=404, detail=f"Contest {contest_id} not found")
-
-
-def _to_response(c: dict[str, Any]) -> ContestResponse:
-    results = c.get("results", [])
+def _to_response(c_dict: dict[str, Any]) -> ContestResponse:
+    results = c_dict.get("results", [])
     solved = [r for r in results if r.get("solved_by_team")]
     counts_by_team: dict[str, int] = {}
     for r in solved:
         team = r["solved_by_team"]
         counts_by_team[team] = counts_by_team.get(team, 0) + 1
     return ContestResponse(
-        id=c["id"],
-        cf_contest_id=c["cf_contest_id"],
-        contest_name=c["contest_name"],
-        date=c["date"],
-        duration_minutes=c["duration_minutes"],
-        teams=[TeamEntry(**t) for t in c["teams"]],
+        id=c_dict["id"],
+        cf_contest_id=c_dict["cf_contest_id"],
+        contest_name=c_dict["contest_name"],
+        date=c_dict["date"],
+        duration_minutes=c_dict["duration_minutes"],
+        teams=[TeamEntry(**t) for t in c_dict["teams"]],
         results=[ProblemResult(**r) for r in results],
-        notes=c.get("notes", ""),
-        created_at=c["created_at"],
+        notes=c_dict.get("notes", ""),
+        created_at=c_dict["created_at"],
         total_problems=len(results),
         solved_count=len(solved),
         solve_counts_by_team=counts_by_team,
@@ -138,19 +117,22 @@ def _to_response(c: dict[str, Any]) -> ContestResponse:
 
 
 @router.get("/")
-async def list_contests() -> list[ContestResponse]:
+async def list_contests(db: AsyncSession = Depends(get_db)) -> list[ContestResponse]:
     """List all virtual contests, sorted by date descending."""
-    data = load_contests()
-    contests = [_to_response(c) for c in data["contests"]]
-    contests.sort(key=lambda c: c.date, reverse=True)
-    return contests
+    contests = await db_ops.get_all_contests(db)
+    result = [_to_response(db_ops.contest_to_dict(c)) for c in contests]
+    result.sort(key=lambda c: c.date, reverse=True)
+    return result
 
 
 @router.get("/trends")
-async def get_trends() -> TrendsResponse:
+async def get_trends(db: AsyncSession = Depends(get_db)) -> TrendsResponse:
     """Aggregated trend data across all virtual contests."""
-    data = load_contests()
-    sorted_contests = sorted(data["contests"], key=lambda c: c["date"])
+    contests = await db_ops.get_all_contests(db)
+    sorted_contests = sorted(
+        [db_ops.contest_to_dict(c) for c in contests],
+        key=lambda c: c["date"],
+    )
 
     points: list[TrendPoint] = []
     for c in sorted_contests:
@@ -199,62 +181,63 @@ async def get_trends() -> TrendsResponse:
 
 
 @router.get("/{contest_id}")
-async def get_contest(contest_id: str) -> ContestResponse:
+async def get_contest(contest_id: str, db: AsyncSession = Depends(get_db)) -> ContestResponse:
     """Get a single contest's full details."""
-    data = load_contests()
-    c = _find_contest(data, contest_id)
-    return _to_response(c)
+    contest = await db_ops.get_contest(db, contest_id)
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest {contest_id} not found")
+    return _to_response(db_ops.contest_to_dict(contest))
 
 
 @router.post("/")
-async def create_contest(body: ContestCreate) -> ContestResponse:
+async def create_contest(body: ContestCreate, db: AsyncSession = Depends(get_db)) -> ContestResponse:
     """Log a new virtual contest."""
-    data = load_contests()
     now = datetime.now(timezone.utc).isoformat()
-    entry = {
-        "id": uuid.uuid4().hex[:8],
-        "cf_contest_id": body.cf_contest_id,
-        "contest_name": body.contest_name,
-        "date": body.date,
-        "duration_minutes": body.duration_minutes,
-        "teams": [t.model_dump() for t in body.teams],
-        "results": [r.model_dump() for r in body.results],
-        "notes": body.notes,
-        "created_at": now,
-    }
-    data["contests"].append(entry)
-    save_contests(data)
-    return _to_response(entry)
+    contest = await db_ops.create_contest(
+        db,
+        cf_contest_id=body.cf_contest_id,
+        contest_name=body.contest_name,
+        date=body.date,
+        duration_minutes=body.duration_minutes,
+        teams=[t.model_dump() for t in body.teams],
+        results=[r.model_dump() for r in body.results],
+        notes=body.notes,
+        created_at=now,
+    )
+    return _to_response(db_ops.contest_to_dict(contest))
 
 
 @router.put("/{contest_id}")
-async def update_contest(contest_id: str, body: ContestUpdate) -> ContestResponse:
+async def update_contest(
+    contest_id: str, body: ContestUpdate, db: AsyncSession = Depends(get_db)
+) -> ContestResponse:
     """Update a virtual contest entry."""
-    data = load_contests()
-    c = _find_contest(data, contest_id)
+    contest = await db_ops.get_contest(db, contest_id)
+    if not contest:
+        raise HTTPException(status_code=404, detail=f"Contest {contest_id} not found")
+
+    updates: dict[str, Any] = {}
     if body.contest_name is not None:
-        c["contest_name"] = body.contest_name
+        updates["contest_name"] = body.contest_name
     if body.date is not None:
-        c["date"] = body.date
+        updates["date"] = body.date
     if body.duration_minutes is not None:
-        c["duration_minutes"] = body.duration_minutes
+        updates["duration_minutes"] = body.duration_minutes
     if body.teams is not None:
-        c["teams"] = [t.model_dump() for t in body.teams]
+        updates["teams"] = [t.model_dump() for t in body.teams]
     if body.results is not None:
-        c["results"] = [r.model_dump() for r in body.results]
+        updates["results"] = [r.model_dump() for r in body.results]
     if body.notes is not None:
-        c["notes"] = body.notes
-    save_contests(data)
-    return _to_response(c)
+        updates["notes"] = body.notes
+
+    contest = await db_ops.update_contest(db, contest, **updates)
+    return _to_response(db_ops.contest_to_dict(contest))
 
 
 @router.delete("/{contest_id}")
-async def delete_contest(contest_id: str) -> dict[str, str]:
+async def delete_contest(contest_id: str, db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     """Delete a virtual contest entry."""
-    data = load_contests()
-    before = len(data["contests"])
-    data["contests"] = [c for c in data["contests"] if c["id"] != contest_id]
-    if len(data["contests"]) == before:
+    deleted = await db_ops.delete_contest(db, contest_id)
+    if not deleted:
         raise HTTPException(status_code=404, detail=f"Contest {contest_id} not found")
-    save_contests(data)
     return {"status": "deleted", "id": contest_id}

@@ -1,6 +1,7 @@
 """Database setup — async SQLAlchemy engine, session factory, and dependency."""
 
 import os
+import ssl
 
 from sqlalchemy import JSON, event
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
@@ -15,16 +16,24 @@ if _raw_url.startswith("postgres://"):
 elif _raw_url.startswith("postgresql://"):
     _raw_url = _raw_url.replace("postgresql://", "postgresql+asyncpg://", 1)
 
+# asyncpg doesn't understand sslmode= query param — strip it and pass ssl via connect_args
+_needs_ssl = "sslmode=require" in _raw_url
+_raw_url = _raw_url.replace("?sslmode=require", "").replace("&sslmode=require", "")
+
 DATABASE_URL = _raw_url
 _is_sqlite = DATABASE_URL.startswith("sqlite")
+
+_connect_args: dict = {}
+if _is_sqlite:
+    _connect_args = {"check_same_thread": False}
+elif _needs_ssl:
+    _ssl_ctx = ssl.create_default_context()
+    _connect_args = {"ssl": _ssl_ctx}
 
 engine = create_async_engine(
     DATABASE_URL,
     echo=False,
-    # SQLite needs these; Postgres ignores them
-    **({
-        "connect_args": {"check_same_thread": False},
-    } if _is_sqlite else {}),
+    connect_args=_connect_args,
 )
 
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)

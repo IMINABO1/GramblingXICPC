@@ -3,10 +3,12 @@
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from services.handle_sync import load_team, save_team
+import db_ops
+from database import get_db
 
 router = APIRouter()
 
@@ -14,7 +16,7 @@ router = APIRouter()
 class EditorialFlagRequest(BaseModel):
     problem_id: str
     used_editorial: bool
-    platform: str = "cf"  # "cf" or "lc"
+    platform: str = "cf"
 
 
 class EditorialFlagResponse(BaseModel):
@@ -39,23 +41,16 @@ class SolveQualityResponse(BaseModel):
     editorial_flags: dict[str, EditorialFlagResponse]
 
 
-def _find_member(team: dict[str, Any], member_id: int) -> dict[str, Any]:
-    for m in team["members"]:
-        if m["id"] == member_id:
-            return m
-    raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
-
-
 @router.get("/{member_id}")
-async def get_solve_quality(member_id: int) -> SolveQualityResponse:
+async def get_solve_quality(member_id: int, db: AsyncSession = Depends(get_db)) -> SolveQualityResponse:
     """Get all solve quality data for a member."""
-    team = load_team()
-    member = _find_member(team, member_id)
+    member = await db_ops.get_member(db, member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
 
-    raw_sq = member.get("solve_quality") or {}
-    editorial_flags = member.get("editorial_flags") or {}
+    raw_sq = await db_ops.get_member_solve_quality(db, member_id)
+    editorial_flags = await db_ops.get_member_editorial_flags(db, member_id)
 
-    # Build solve quality entries with editorial overrides applied
     entries: dict[str, SolveQualityEntry] = {}
     for pid, sq in raw_sq.items():
         has_override = pid in editorial_flags
@@ -77,37 +72,31 @@ async def get_solve_quality(member_id: int) -> SolveQualityResponse:
         )
 
     return SolveQualityResponse(
-        member_id=member["id"],
-        member_name=member["name"],
+        member_id=member.id,
+        member_name=member.name,
         solve_quality=entries,
         editorial_flags=flag_responses,
     )
 
 
 @router.post("/{member_id}")
-async def flag_editorial(member_id: int, req: EditorialFlagRequest) -> EditorialFlagResponse:
+async def flag_editorial(
+    member_id: int, req: EditorialFlagRequest, db: AsyncSession = Depends(get_db)
+) -> EditorialFlagResponse:
     """Mark a problem as 'used editorial'. Overrides auto-detection weight to 0.5."""
     if req.platform not in ("cf", "lc"):
         raise HTTPException(status_code=400, detail="platform must be 'cf' or 'lc'")
 
-    team = load_team()
-    member = _find_member(team, member_id)
-
-    if "editorial_flags" not in member or member["editorial_flags"] is None:
-        member["editorial_flags"] = {}
+    member = await db_ops.get_member(db, member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
 
     now = datetime.now(timezone.utc).isoformat()
 
     if req.used_editorial:
-        member["editorial_flags"][req.problem_id] = {
-            "platform": req.platform,
-            "flagged_at": now,
-        }
+        await db_ops.set_editorial_flag(db, member_id, req.problem_id, platform=req.platform, flagged_at=now)
     else:
-        # Remove flag if setting used_editorial to false
-        member["editorial_flags"].pop(req.problem_id, None)
-
-    save_team(team)
+        await db_ops.remove_editorial_flag(db, member_id, req.problem_id)
 
     return EditorialFlagResponse(
         problem_id=req.problem_id,
@@ -118,17 +107,16 @@ async def flag_editorial(member_id: int, req: EditorialFlagRequest) -> Editorial
 
 
 @router.delete("/{member_id}/{problem_id}")
-async def unflag_editorial(member_id: int, problem_id: str) -> dict[str, str]:
+async def unflag_editorial(
+    member_id: int, problem_id: str, db: AsyncSession = Depends(get_db)
+) -> dict[str, str]:
     """Remove the editorial flag for a problem."""
-    team = load_team()
-    member = _find_member(team, member_id)
+    member = await db_ops.get_member(db, member_id)
+    if not member:
+        raise HTTPException(status_code=404, detail=f"Member {member_id} not found")
 
-    flags = member.get("editorial_flags") or {}
-    if problem_id not in flags:
+    removed = await db_ops.remove_editorial_flag(db, member_id, problem_id)
+    if not removed:
         raise HTTPException(status_code=404, detail=f"No editorial flag for {problem_id}")
-
-    del flags[problem_id]
-    member["editorial_flags"] = flags
-    save_team(team)
 
     return {"status": "ok", "problem_id": problem_id}

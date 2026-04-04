@@ -30,5 +30,16 @@ nul
 # Logs
 *.log
 
+# Database
+backend/data/*.db
+
+# Mutable JSON files (now in database)
+backend/data/team.json
+backend/data/contests.json
+backend/data/notes.json
+backend/data/journals.json
+backend/data/tags.json
+backend/data/upsolve_dismissed.json
+
 # Environment
 .env

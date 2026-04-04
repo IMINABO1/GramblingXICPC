@@ -5,23 +5,22 @@ from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+
+import db_ops
+from database import get_db
 
 router = APIRouter()
 DATA_DIR = Path(__file__).parent.parent / "data"
 
 
-def load_team() -> dict[str, Any]:
-    with open(DATA_DIR / "team.json", "r", encoding="utf-8") as f:
-        return json.load(f)
-
-
-def load_problems() -> list[dict[str, Any]]:
+def _load_problems() -> list[dict[str, Any]]:
     with open(DATA_DIR / "problems.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 
-def load_topics() -> dict[str, Any]:
+def _load_topics() -> dict[str, Any]:
     with open(DATA_DIR / "topics.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
@@ -39,7 +38,6 @@ def compute_streaks(timestamps: dict[str, int]) -> dict[str, Any]:
     if not solve_dates:
         return {"current_streak": 0, "longest_streak": 0, "last_active_date": None}
 
-    # Compute longest streak
     longest = 1
     run = 1
     for i in range(1, len(solve_dates)):
@@ -49,7 +47,6 @@ def compute_streaks(timestamps: dict[str, int]) -> dict[str, Any]:
         else:
             run = 1
 
-    # Current streak: must include today or yesterday
     today = datetime.now(timezone.utc).date()
     if solve_dates[-1] < today - timedelta(days=1):
         current_streak = 0
@@ -73,7 +70,6 @@ def compute_weekly_solves(
     curated_ids: set[str],
     weeks: int,
 ) -> list[dict[str, Any]]:
-    """Count curated solves per ISO week (Monday-Sunday UTC)."""
     today = datetime.now(timezone.utc).date()
     current_monday = today - timedelta(days=today.weekday())
 
@@ -108,7 +104,6 @@ def compute_topic_coverage(
     problems: list[dict[str, Any]],
     topics_meta: dict[str, Any],
 ) -> list[dict[str, Any]]:
-    """Per-topic solved/total/pct for a member."""
     solved_set = set(solved_curated)
     topic_totals: dict[str, int] = {}
     topic_solved: dict[str, int] = {}
@@ -138,25 +133,25 @@ def compute_topic_coverage(
 @router.get("/")
 async def get_leaderboard(
     weeks: int = Query(default=8, ge=1, le=52, description="Weeks of history"),
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Full leaderboard with rankings, streaks, weekly solves, topic coverage."""
-    team = load_team()
-    problems = load_problems()
-    topics_meta = load_topics()
+    members_orm = await db_ops.get_all_members(db)
+    team_members = [db_ops.member_to_dict(m) for m in members_orm]
+
+    problems = _load_problems()
+    topics_meta = _load_topics()
 
     curated_ids = {p["id"] for p in problems}
     curated_total = len(problems)
     total_topics = len(topics_meta["topics"])
-
-    # Build per-problem lookup
     pid_to_problem = {p["id"]: p for p in problems}
 
     members = []
-    for m in team["members"]:
+    for m in team_members:
         solved = m.get("solved_curated", [])
         timestamps = m.get("problem_timestamps", {})
 
-        # Avg rating of solved curated problems
         solved_ratings = [
             pid_to_problem[pid]["rating"]
             for pid in solved
@@ -164,7 +159,6 @@ async def get_leaderboard(
         ]
         avg_rating = round(sum(solved_ratings) / len(solved_ratings), 1) if solved_ratings else 0.0
 
-        # Topics touched
         topics_touched = len({
             pid_to_problem[pid]["topic"]
             for pid in solved
@@ -185,7 +179,6 @@ async def get_leaderboard(
             "topic_coverage": compute_topic_coverage(solved, problems, topics_meta),
         })
 
-    # Sort by curated_solved desc, then by avg_rating desc as tiebreaker
     members.sort(key=lambda x: (x["curated_solved"], x["avg_rating_solved"]), reverse=True)
 
     return {
@@ -199,11 +192,14 @@ async def get_leaderboard(
 @router.get("/weekly-summary")
 async def get_weekly_summary(
     week_offset: int = Query(default=0, ge=0, le=52, description="0=this week, 1=last week"),
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Pre-formatted weekly summary for Discord/Slack."""
-    team = load_team()
-    problems = load_problems()
-    topics_meta = load_topics()
+    members_orm = await db_ops.get_all_members(db)
+    team_members = [db_ops.member_to_dict(m) for m in members_orm]
+
+    problems = _load_problems()
+    topics_meta = _load_topics()
 
     curated_ids = {p["id"] for p in problems}
     pid_to_topic = {p["id"]: p["topic"] for p in problems}
@@ -225,7 +221,7 @@ async def get_weekly_summary(
     total_team_solves = 0
     member_rows = []
 
-    for m in team["members"]:
+    for m in team_members:
         timestamps = m.get("problem_timestamps", {})
         week_pids = [
             pid for pid, ts in timestamps.items()
@@ -248,7 +244,7 @@ async def get_weekly_summary(
     member_rows.sort(key=lambda x: x["count"], reverse=True)
 
     curated_total = len(problems)
-    medals = ["\U0001f947", "\U0001f948", "\U0001f949"]  # gold, silver, bronze
+    medals = ["\U0001f947", "\U0001f948", "\U0001f949"]
 
     lines = [
         f"## CF:ICPC Weekly Report",

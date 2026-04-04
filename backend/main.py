@@ -20,6 +20,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Create database tables (idempotent)
+    from database import create_tables, dispose_engine
+    logger.info("Creating database tables...")
+    await create_tables()
+    logger.info("Database ready.")
+
     # Build curated graph on startup if missing (e.g. fresh Heroku deploy)
     try:
         from services.graph_builder import build_curated_graph
@@ -37,6 +43,8 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.warning(f"Could not pre-load FAISS index: {e} — note recommendations disabled, all other endpoints still work")
     yield
+
+    await dispose_engine()
 
 
 app = FastAPI(

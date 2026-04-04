@@ -8,3 +8,9 @@ cloudscraper
 faiss-cpu
 python-dotenv
 huggingface_hub
+sqlalchemy[asyncio]
+aiosqlite
+asyncpg
+pytest
+pytest-asyncio
+httpx

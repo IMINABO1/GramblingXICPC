@@ -2,19 +2,19 @@
 
 import json
 import re
-import uuid
-from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
+import db_ops
+from database import get_db
 from services.note_embeddings import recommend_from_text
 
 DATA_DIR = Path(__file__).parent.parent / "data"
-JOURNALS_FILE = DATA_DIR / "journals.json"
-TEAM_FILE = DATA_DIR / "team.json"
+PROBLEMS_FILE = DATA_DIR / "problems.json"
 
 router = APIRouter()
 
@@ -43,75 +43,14 @@ class CustomTopicCreate(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def load_journals() -> dict[str, Any]:
-    if not JOURNALS_FILE.exists():
-        return {"journals": [], "custom_topics": []}
-    with open(JOURNALS_FILE, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if "custom_topics" not in data:
-        data["custom_topics"] = []
-    return data
-
-
-def save_journals(data: dict[str, Any]) -> None:
-    with open(JOURNALS_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
-
-
-def _find_journal(
-    data: dict[str, Any], member_id: int, topic_id: str
-) -> dict[str, Any] | None:
-    for j in data["journals"]:
-        if j["member_id"] == member_id and j["topic_id"] == topic_id:
-            return j
-    return None
-
-
-PROBLEMS_FILE = DATA_DIR / "problems.json"
-
-
-def _load_member_solved(member_id: int) -> set[str]:
-    """Load solved problem IDs for a member."""
-    if not TEAM_FILE.exists():
-        return set()
-    with open(TEAM_FILE, "r", encoding="utf-8") as f:
-        team = json.load(f)
-    for m in team.get("members", []):
-        if m["id"] == member_id:
-            return set(m.get("solved_curated", []))
-    return set()
-
-
-def _get_member_avg_rating(member_id: int) -> int:
-    """Compute average rating of curated problems solved by a member."""
-    solved = _load_member_solved(member_id)
-    if not solved or not PROBLEMS_FILE.exists():
-        return 0
-    with open(PROBLEMS_FILE, "r", encoding="utf-8") as f:
-        problems = json.load(f)
-    ratings = [p["rating"] for p in problems if p["id"] in solved and p.get("rating", 0) > 0]
-    return round(sum(ratings) / len(ratings)) if ratings else 0
-
-
-def _load_team_members() -> list[dict[str, Any]]:
-    """Load team member list."""
-    if not TEAM_FILE.exists():
-        return []
-    with open(TEAM_FILE, "r", encoding="utf-8") as f:
-        team = json.load(f)
-    return team.get("members", [])
-
-
 def _search_score(query: str, text: str) -> float:
     """Score text relevance to a query using token matching."""
     query_lower = query.lower()
     text_lower = text.lower()
 
-    # Exact substring match gets highest score
     if query_lower in text_lower:
         return 1.0
 
-    # Token-based matching
     tokens = re.split(r"\s+", query_lower)
     if not tokens:
         return 0.0
@@ -120,55 +59,48 @@ def _search_score(query: str, text: str) -> float:
     return matched / len(tokens)
 
 
+def _get_member_avg_rating_from_solved(solved: set[str]) -> int:
+    if not solved or not PROBLEMS_FILE.exists():
+        return 0
+    with open(PROBLEMS_FILE, "r", encoding="utf-8") as f:
+        problems = json.load(f)
+    ratings = [p["rating"] for p in problems if p["id"] in solved and p.get("rating", 0) > 0]
+    return round(sum(ratings) / len(ratings)) if ratings else 0
+
+
 # ---------------------------------------------------------------------------
 # Custom Topics
 # ---------------------------------------------------------------------------
 
 
 @router.get("/topics")
-async def list_custom_topics() -> list[dict[str, Any]]:
+async def list_custom_topics(db: AsyncSession = Depends(get_db)) -> list[dict[str, Any]]:
     """List all custom journal topics."""
-    data = load_journals()
-    return data.get("custom_topics", [])
+    topics = await db_ops.get_all_custom_topics(db)
+    return [db_ops.custom_topic_to_dict(t) for t in topics]
 
 
 @router.post("/topics")
-async def create_custom_topic(body: CustomTopicCreate) -> dict[str, Any]:
+async def create_custom_topic(
+    body: CustomTopicCreate, db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
     """Create a custom journal topic."""
-    data = load_journals()
-    now = datetime.now(timezone.utc).isoformat()
+    existing = await db_ops.get_custom_topic_by_name(db, body.name.strip())
+    if existing:
+        raise HTTPException(status_code=409, detail="Topic with this name already exists")
 
-    # Check for duplicate names
-    for t in data.get("custom_topics", []):
-        if t["name"].lower() == body.name.strip().lower():
-            raise HTTPException(status_code=409, detail="Topic with this name already exists")
-
-    topic = {
-        "id": f"custom_{uuid.uuid4().hex[:8]}",
-        "name": body.name.strip(),
-        "icon": body.icon,
-        "created_by": body.created_by,
-        "created_at": now,
-    }
-    data["custom_topics"].append(topic)
-    save_journals(data)
-    return topic
+    topic = await db_ops.create_custom_topic(
+        db, name=body.name, icon=body.icon, created_by=body.created_by
+    )
+    return db_ops.custom_topic_to_dict(topic)
 
 
 @router.delete("/topics/{topic_id}")
-async def delete_custom_topic(topic_id: str) -> dict[str, str]:
+async def delete_custom_topic(topic_id: str, db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     """Delete a custom topic and all its journal entries."""
-    data = load_journals()
-
-    before = len(data.get("custom_topics", []))
-    data["custom_topics"] = [t for t in data.get("custom_topics", []) if t["id"] != topic_id]
-    if len(data["custom_topics"]) == before:
+    deleted = await db_ops.delete_custom_topic(db, topic_id)
+    if not deleted:
         raise HTTPException(status_code=404, detail=f"Custom topic {topic_id} not found")
-
-    # Remove all journals for this topic
-    data["journals"] = [j for j in data["journals"] if j["topic_id"] != topic_id]
-
-    save_journals(data)
     return {"status": "deleted", "id": topic_id}
 
 
@@ -178,99 +110,56 @@ async def delete_custom_topic(topic_id: str) -> dict[str, str]:
 
 
 @router.get("/member/{member_id}")
-async def get_member_journals(member_id: int) -> list[dict[str, Any]]:
+async def get_member_journals(member_id: int, db: AsyncSession = Depends(get_db)) -> list[dict[str, Any]]:
     """List all journals for a member, sorted by most recently updated."""
-    data = load_journals()
-    journals = [j for j in data["journals"] if j["member_id"] == member_id]
-    journals.sort(key=lambda j: j.get("updated_at", j["created_at"]), reverse=True)
-    return journals
+    journals = await db_ops.get_member_journals(db, member_id)
+    return [db_ops.journal_to_dict(j) for j in journals]
 
 
 @router.get("/member/{member_id}/topic/{topic_id}")
-async def get_journal(member_id: int, topic_id: str) -> dict[str, Any] | None:
+async def get_journal(
+    member_id: int, topic_id: str, db: AsyncSession = Depends(get_db)
+) -> dict[str, Any] | None:
     """Get a specific journal with all entries."""
-    data = load_journals()
-    return _find_journal(data, member_id, topic_id)
+    journal = await db_ops.get_journal(db, member_id, topic_id)
+    return db_ops.journal_to_dict(journal) if journal else None
 
 
 @router.post("/member/{member_id}/topic/{topic_id}")
-async def add_entry(member_id: int, topic_id: str, body: EntryCreate) -> dict[str, Any]:
+async def add_entry(
+    member_id: int, topic_id: str, body: EntryCreate, db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
     """Add an entry to a journal (auto-creates the journal if it doesn't exist)."""
-    data = load_journals()
-    now = datetime.now(timezone.utc).isoformat()
-
-    journal = _find_journal(data, member_id, topic_id)
-
-    entry = {
-        "id": f"entry_{uuid.uuid4().hex[:8]}",
-        "content": body.content,
-        "created_at": now,
-    }
-
-    if journal:
-        journal["entries"].append(entry)
-        journal["updated_at"] = now
-    else:
-        journal = {
-            "id": f"journal_{uuid.uuid4().hex[:8]}",
-            "member_id": member_id,
-            "topic_id": topic_id,
-            "entries": [entry],
-            "created_at": now,
-            "updated_at": now,
-        }
-        data["journals"].append(journal)
-
-    save_journals(data)
-    return journal
+    journal = await db_ops.add_journal_entry(db, member_id, topic_id, body.content)
+    return db_ops.journal_to_dict(journal)
 
 
 @router.put("/member/{member_id}/topic/{topic_id}/entry/{entry_id}")
 async def edit_entry(
-    member_id: int, topic_id: str, entry_id: str, body: EntryUpdate
+    member_id: int, topic_id: str, entry_id: str, body: EntryUpdate,
+    db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
     """Edit a specific journal entry."""
-    data = load_journals()
-    journal = _find_journal(data, member_id, topic_id)
-    if not journal:
+    journal = await db_ops.edit_journal_entry(db, member_id, topic_id, entry_id, body.content)
+    if journal is None:
         raise HTTPException(
             status_code=404,
-            detail=f"No journal for member {member_id}, topic {topic_id}",
+            detail=f"Journal or entry not found for member {member_id}, topic {topic_id}, entry {entry_id}",
         )
-
-    for entry in journal["entries"]:
-        if entry["id"] == entry_id:
-            entry["content"] = body.content
-            journal["updated_at"] = datetime.now(timezone.utc).isoformat()
-            save_journals(data)
-            return journal
-
-    raise HTTPException(status_code=404, detail=f"Entry {entry_id} not found")
+    return db_ops.journal_to_dict(journal)
 
 
 @router.delete("/member/{member_id}/topic/{topic_id}/entry/{entry_id}")
-async def delete_entry(member_id: int, topic_id: str, entry_id: str) -> dict[str, Any]:
+async def delete_entry(
+    member_id: int, topic_id: str, entry_id: str, db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
     """Delete a specific journal entry. Removes journal if last entry deleted."""
-    data = load_journals()
-    journal = _find_journal(data, member_id, topic_id)
-    if not journal:
+    result = await db_ops.delete_journal_entry(db, member_id, topic_id, entry_id)
+    if result is None:
         raise HTTPException(
             status_code=404,
-            detail=f"No journal for member {member_id}, topic {topic_id}",
+            detail=f"Journal or entry not found for member {member_id}, topic {topic_id}, entry {entry_id}",
         )
-
-    before = len(journal["entries"])
-    journal["entries"] = [e for e in journal["entries"] if e["id"] != entry_id]
-    if len(journal["entries"]) == before:
-        raise HTTPException(status_code=404, detail=f"Entry {entry_id} not found")
-
-    if not journal["entries"]:
-        # Remove empty journal
-        data["journals"] = [j for j in data["journals"] if j["id"] != journal["id"]]
-    else:
-        journal["updated_at"] = datetime.now(timezone.utc).isoformat()
-
-    save_journals(data)
     return {"status": "deleted", "entry_id": entry_id}
 
 
@@ -283,30 +172,29 @@ async def delete_entry(member_id: int, topic_id: str, entry_id: str) -> dict[str
 async def get_all_entries_for_topic(
     topic_id: str,
     member_id: int | None = Query(default=None),
+    db: AsyncSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    """Get all journal entries for a topic from all (or filtered) members.
+    """Get all journal entries for a topic from all (or filtered) members."""
+    members = await db_ops.get_all_members(db)
+    member_map = {m.id: m.name for m in members}
 
-    Returns a flat list of entries with member metadata, sorted chronologically (newest first).
-    """
-    data = load_journals()
-    members = _load_team_members()
-    member_map = {m["id"]: m["name"] for m in members}
+    all_journals = await db_ops.get_all_journals(db)
 
     entries: list[dict[str, Any]] = []
-    for journal in data["journals"]:
-        if journal["topic_id"] != topic_id:
+    for journal in all_journals:
+        if journal.topic_id != topic_id:
             continue
-        if member_id is not None and journal["member_id"] != member_id:
+        if member_id is not None and journal.member_id != member_id:
             continue
 
-        for entry in journal["entries"]:
+        for entry in journal.entries:
             entries.append({
-                "id": entry["id"],
-                "content": entry["content"],
-                "created_at": entry["created_at"],
-                "member_id": journal["member_id"],
-                "member_name": member_map.get(journal["member_id"], f"Member {journal['member_id'] + 1}"),
-                "journal_id": journal["id"],
+                "id": entry.id,
+                "content": entry.content,
+                "created_at": entry.created_at,
+                "member_id": journal.member_id,
+                "member_name": member_map.get(journal.member_id, f"Member {journal.member_id + 1}"),
+                "journal_id": journal.id,
             })
 
     entries.sort(key=lambda e: e["created_at"], reverse=True)
@@ -324,35 +212,34 @@ async def search_journals(
     member_id: int | None = Query(default=None),
     topic_id: str | None = Query(default=None),
     limit: int = Query(default=50, ge=1, le=200),
+    db: AsyncSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
-    """Search journal entries by text content.
+    """Search journal entries by text content."""
+    members = await db_ops.get_all_members(db)
+    member_map = {m.id: m.name for m in members}
 
-    Returns entries scored by relevance with member and topic metadata.
-    """
-    data = load_journals()
-    members = _load_team_members()
-    member_map = {m["id"]: m["name"] for m in members}
+    all_journals = await db_ops.get_all_journals(db)
 
     scored: list[tuple[float, dict[str, Any]]] = []
-    for journal in data["journals"]:
-        if member_id is not None and journal["member_id"] != member_id:
+    for journal in all_journals:
+        if member_id is not None and journal.member_id != member_id:
             continue
-        if topic_id is not None and journal["topic_id"] != topic_id:
+        if topic_id is not None and journal.topic_id != topic_id:
             continue
 
-        for entry in journal["entries"]:
-            score = _search_score(q, entry["content"])
+        for entry in journal.entries:
+            score = _search_score(q, entry.content)
             if score > 0:
                 scored.append((score, {
-                    "id": entry["id"],
-                    "content": entry["content"],
-                    "created_at": entry["created_at"],
-                    "member_id": journal["member_id"],
+                    "id": entry.id,
+                    "content": entry.content,
+                    "created_at": entry.created_at,
+                    "member_id": journal.member_id,
                     "member_name": member_map.get(
-                        journal["member_id"], f"Member {journal['member_id'] + 1}"
+                        journal.member_id, f"Member {journal.member_id + 1}"
                     ),
-                    "topic_id": journal["topic_id"],
-                    "journal_id": journal["id"],
+                    "topic_id": journal.topic_id,
+                    "journal_id": journal.id,
                     "score": round(score, 3),
                 }))
 
@@ -361,34 +248,33 @@ async def search_journals(
 
 
 # ---------------------------------------------------------------------------
-# Recommendations (sync def to avoid blocking event loop)
+# Recommendations
 # ---------------------------------------------------------------------------
 
 
 @router.get("/member/{member_id}/topic/{topic_id}/recommend")
-def get_journal_recommendations(
+async def get_journal_recommendations(
     member_id: int,
     topic_id: str,
     limit: int = Query(default=10, ge=1, le=50),
+    db: AsyncSession = Depends(get_db),
 ) -> list[dict[str, Any]]:
     """Get problem recommendations based on combined journal entries."""
-    data = load_journals()
-    journal = _find_journal(data, member_id, topic_id)
+    journal = await db_ops.get_journal(db, member_id, topic_id)
 
-    if not journal or not journal["entries"]:
+    if not journal or not journal.entries:
         raise HTTPException(
             status_code=404,
             detail=f"No journal entries for member {member_id}, topic {topic_id}",
         )
 
-    # Concatenate all entries for a richer semantic representation
-    combined = "\n\n".join(e["content"] for e in journal["entries"])
+    combined = "\n\n".join(e.content for e in journal.entries)
 
     if len(combined.strip()) < 10:
         return []
 
-    solved = _load_member_solved(member_id)
-    target = _get_member_avg_rating(member_id)
+    solved = set(await db_ops.get_member_solved_curated(db, member_id))
+    target = _get_member_avg_rating_from_solved(solved)
 
     try:
         return recommend_from_text(combined, limit=limit, exclude_ids=solved, target_rating=target)

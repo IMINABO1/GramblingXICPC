@@ -1,28 +1,15 @@
 """Upsolve router — derived queue from virtual contests + team solve data."""
 
-import json
-from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from .contests import load_contests, save_contests
-
-DATA_DIR = Path(__file__).parent.parent / "data"
-TEAM_FILE = DATA_DIR / "team.json"
+import db_ops
+from database import get_db
 
 router = APIRouter()
-
-
-# ---------------------------------------------------------------------------
-# Helpers
-# ---------------------------------------------------------------------------
-
-
-def _load_team() -> dict[str, Any]:
-    with open(TEAM_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
 
 
 # ---------------------------------------------------------------------------
@@ -105,26 +92,27 @@ class DismissRequest(BaseModel):
 # ---------------------------------------------------------------------------
 
 
-def _build_queue() -> list[UpsolveContestGroup]:
+async def _build_queue(db: AsyncSession) -> list[UpsolveContestGroup]:
     """Build the full upsolve queue from contests + team data."""
-    contests_data = load_contests()
-    team_data = _load_team()
+    contests = await db_ops.get_all_contests(db)
+    members = await db_ops.get_all_members(db)
 
-    # Build member lookup: id → {name, accepted_set}
+    # Build member lookup: id -> {name, accepted_set}
     member_lookup: dict[int, dict[str, Any]] = {}
-    for m in team_data["members"]:
-        member_lookup[m["id"]] = {
-            "name": m["name"],
-            "accepted": set(m.get("all_accepted", [])),
+    for m in members:
+        m_dict = db_ops.member_to_dict(m)
+        member_lookup[m.id] = {
+            "name": m.name,
+            "accepted": set(m_dict.get("all_accepted", [])),
         }
 
     groups: list[UpsolveContestGroup] = []
 
-    for contest in contests_data["contests"]:
+    for contest_obj in contests:
+        contest = db_ops.contest_to_dict(contest_obj)
         cf_contest_id = contest["cf_contest_id"]
         dismissed_set = set(contest.get("dismissed_problems", []))
 
-        # Collect participating member IDs
         participant_ids: list[int] = []
         seen_ids: set[int] = set()
         for team in contest.get("teams", []):
@@ -195,7 +183,6 @@ def _build_queue() -> list[UpsolveContestGroup]:
             total_pending=group_total - group_solved,
         ))
 
-    # Sort by date descending
     groups.sort(key=lambda g: g.contest_date, reverse=True)
     return groups
 
@@ -206,9 +193,9 @@ def _build_queue() -> list[UpsolveContestGroup]:
 
 
 @router.get("/")
-async def get_upsolve_queue() -> UpsolveQueueResponse:
+async def get_upsolve_queue(db: AsyncSession = Depends(get_db)) -> UpsolveQueueResponse:
     """Full upsolve queue grouped by contest."""
-    groups = _build_queue()
+    groups = await _build_queue(db)
     total = sum(g.total_items for g in groups)
     solved = sum(g.total_solved for g in groups)
     return UpsolveQueueResponse(
@@ -220,9 +207,9 @@ async def get_upsolve_queue() -> UpsolveQueueResponse:
 
 
 @router.get("/stats")
-async def get_upsolve_stats() -> UpsolveStatsResponse:
+async def get_upsolve_stats(db: AsyncSession = Depends(get_db)) -> UpsolveStatsResponse:
     """Aggregated upsolve statistics."""
-    groups = _build_queue()
+    groups = await _build_queue(db)
 
     total = 0
     solved = 0
@@ -275,29 +262,18 @@ async def get_upsolve_stats() -> UpsolveStatsResponse:
 
 
 @router.post("/dismiss")
-async def dismiss_problem(body: DismissRequest) -> dict[str, str]:
+async def dismiss_problem(body: DismissRequest, db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     """Mark a problem as dismissed from the upsolve queue."""
-    data = load_contests()
-    for c in data["contests"]:
-        if c["id"] == body.contest_id:
-            dismissed = c.setdefault("dismissed_problems", [])
-            if body.problem_index not in dismissed:
-                dismissed.append(body.problem_index)
-            save_contests(data)
-            return {"status": "dismissed"}
-    raise HTTPException(status_code=404, detail=f"Contest {body.contest_id} not found")
+    contest = await db_ops.dismiss_contest_problem(db, body.contest_id, body.problem_index)
+    if contest is None:
+        raise HTTPException(status_code=404, detail=f"Contest {body.contest_id} not found")
+    return {"status": "dismissed"}
 
 
 @router.post("/undismiss")
-async def undismiss_problem(body: DismissRequest) -> dict[str, str]:
+async def undismiss_problem(body: DismissRequest, db: AsyncSession = Depends(get_db)) -> dict[str, str]:
     """Remove a problem from the dismissed list."""
-    data = load_contests()
-    for c in data["contests"]:
-        if c["id"] == body.contest_id:
-            dismissed = c.get("dismissed_problems", [])
-            if body.problem_index in dismissed:
-                dismissed.remove(body.problem_index)
-                c["dismissed_problems"] = dismissed
-            save_contests(data)
-            return {"status": "undismissed"}
-    raise HTTPException(status_code=404, detail=f"Contest {body.contest_id} not found")
+    contest = await db_ops.undismiss_contest_problem(db, body.contest_id, body.problem_index)
+    if contest is None:
+        raise HTTPException(status_code=404, detail=f"Contest {body.contest_id} not found")
+    return {"status": "undismissed"}
